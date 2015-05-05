@@ -93,7 +93,6 @@ import org.ccsds.moims.mo.mc.parameter.structures.ParameterValue;
 import org.ccsds.moims.mo.mc.parameter.structures.ParameterValueList;
 import org.ccsds.moims.mo.mc.structures.ParameterExpression;
 
-
 /**
  * This class provides a simple form for the control of the consumer.
  */
@@ -108,18 +107,17 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private final SessionType session = SessionType.LIVE;
   private final Identifier sessionName = new Identifier("LIVE");
   private final int numberOfColumns = 5;
-  public ParameterLabel[] labels = new ParameterLabel[32*numberOfColumns];
+  public ParameterLabel[] labels = new ParameterLabel[32 * numberOfColumns];
   private final int map_width = 750; // number of pixels on the width of the map
 
   private final Subscription subRequestWildcard;
   private final Subscription subRequestHalf;
   private final Subscription subRequestAll;
-  private final DelayManager delayManager;
-  
+
   private WorldMap map;  // Map coordinates sync
   private double mapLatitude = 0;
   private double mapLongitude = 0;
-  
+
   private final ParameterConsumerAdapter adapterParameter = new ParameterConsumerAdapter();
   private final AggregationConsumerAdapter adapterAggregation = new AggregationConsumerAdapter();
   private MALContextFactory malFactory;
@@ -138,10 +136,11 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private int parameterDefinitionSelectedIndex = 0;
   private int aggregationDefinitionSelectedIndex = 0;
 
-  private String[] parameterSetsTableCol = new String [] { "Parameter", "sampleInterval", "th-type", "th-value" };
-  
-  
-  
+  private String[] parameterSetsTableCol = new String[]
+  {
+    "Parameter", "sampleInterval", "th-type", "th-value"
+  };
+
   /**
    * Main command line entry point.
    *
@@ -191,92 +190,127 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
 
     this.setTitle(name);
 
-    delayManager = new DelayManager(delayLabel, 16);
-
     map = new WorldMap(map_width);
-    
-    String[] parameterTableCol = new String [] {
-        "Obj Inst Id", "name", "description", "rawType", "rawUnit", "generationEnabled", "updateInterval"    };
-        
+
+    String[] parameterTableCol = new String[]
+    {
+      "Obj Inst Id", "name", "description", "rawType", "rawUnit", "generationEnabled", "updateInterval"
+    };
+
     parameterTableData = new javax.swing.table.DefaultTableModel(
-        new Object [][] { }, parameterTableCol         ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class, 
+            new Object[][]
+            {
+            }, parameterTableCol)
+            {
+              Class[] types = new Class[]
+              {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Object.class,
                 java.lang.String.class, java.lang.Boolean.class, java.lang.Float.class
+              };
+
+              @Override               //all cells false
+              public boolean isCellEditable(int row, int column)
+              {
+                return false;
+              }
+
+              @Override
+              public Class getColumnClass(int columnIndex)
+              {
+                return types[columnIndex];
+              }
             };
-            
-            @Override               //all cells false
-            public boolean isCellEditable(int row, int column) { return false;  }
-               
-            @Override
-            public Class getColumnClass(int columnIndex) { return types [columnIndex];   }
-        };
-    
-    String[] aggregationTableCol = new String [] {
-                "Obj Inst Id", "name", "description", "category", 
-            "generationEnabled", "updateInterval", "filterEnabled", "filteredTimeout"  };
+
+    String[] aggregationTableCol = new String[]
+    {
+      "Obj Inst Id", "name", "description", "category",
+      "generationEnabled", "updateInterval", "filterEnabled", "filteredTimeout"
+    };
 
     aggregationTableData = new javax.swing.table.DefaultTableModel(
-        new Object [][] { }, aggregationTableCol         ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class, 
+            new Object[][]
+            {
+            }, aggregationTableCol)
+            {
+              Class[] types = new Class[]
+              {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Integer.class,
                 java.lang.Boolean.class, java.lang.Float.class, java.lang.Boolean.class, java.lang.Float.class
+              };
+
+              @Override               //all cells false
+              public boolean isCellEditable(int row, int column)
+              {
+                return false;
+              }
+
+              @Override
+              public Class getColumnClass(int columnIndex)
+              {
+                return types[columnIndex];
+              }
             };
-            
-            @Override               //all cells false
-            public boolean isCellEditable(int row, int column) { return false;  }
-               
-            @Override
-            public Class getColumnClass(int columnIndex) { return types [columnIndex];   }
-        };
-        
-        
+
     parameterSetsTableData = new javax.swing.table.DefaultTableModel(
-        new Object [][] { }, parameterSetsTableCol     ) {
-            Class[] types = new Class [] {
+            new Object[][]
+            {
+            }, parameterSetsTableCol)
+            {
+              Class[] types = new Class[]
+              {
                 java.lang.String.class, java.lang.Float.class, java.lang.String.class, java.lang.Float.class
+              };
+
+              @Override               //all cells false
+              public boolean isCellEditable(int row, int column)
+              {
+                return false;
+              }
+
+              @Override
+              public Class getColumnClass(int columnIndex)
+              {
+                return types[columnIndex];
+              }
             };
-            
-            @Override               //all cells false
-            public boolean isCellEditable(int row, int column) { return false;  }
-               
-            @Override
-            public Class getColumnClass(int columnIndex) { return types [columnIndex];   }
-        };
 
 //    parameterSetsTableDataAll.add( new DefaultTableModel() );
-
     Registers reg = new Registers();
 
     boolean loadSuccess = reg.load(this);
-    if (loadSuccess){
-        parameterTableData.setDataVector( reg.getParameterTableDataVector(), new Vector<String>(Arrays.asList(parameterTableCol)) );
-        aggregationTableData.setDataVector( reg.getAggregationTableDataVector(), new Vector<String>(Arrays.asList(aggregationTableCol)) );
-        for (int i = 0; i < reg.sizeOfParameterSetsTable(); i++){
-            parameterSetsTableDataAll.add( i, new DefaultTableModel() );
-            parameterSetsTableDataAll.get(i).setDataVector(reg.getparameterSetsTableDataVector(i), new Vector<String>(Arrays.asList(parameterSetsTableCol)));
-        }
+    if (loadSuccess)
+    {
+      parameterTableData.setDataVector(reg.getParameterTableDataVector(), new Vector<String>(Arrays.asList(parameterTableCol)));
+      aggregationTableData.setDataVector(reg.getAggregationTableDataVector(), new Vector<String>(Arrays.asList(aggregationTableCol)));
+      for (int i = 0; i < reg.sizeOfParameterSetsTable(); i++)
+      {
+        parameterSetsTableDataAll.add(i, new DefaultTableModel());
+        parameterSetsTableDataAll.get(i).setDataVector(reg.getparameterSetsTableDataVector(i), new Vector<String>(Arrays.asList(parameterSetsTableCol)));
+      }
     }
-    
-        final java.awt.Dimension dim = new java.awt.Dimension(64, 16);
-        for (int i = 0; i < labels.length; ++i)
-        {
-            labels[i] = new ParameterLabel(i, delayManager);
 
-            if (!loadSuccess){
-                labels[i].setMinimumSize(dim);
-                labels[i].setPreferredSize(dim);
-                labels[i].setMaximumSize(dim);
-                labels[i].setOpaque(true);
-                labels[i].setBackground(Color.WHITE);
-                labels[i].setForeground(Color.GREEN);
-                labels[i].setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-            }else{
-                labels[i] = reg.getLabels(i);
-            }
+    final java.awt.Dimension dim = new java.awt.Dimension(64, 16);
+    for (int i = 0; i < labels.length; ++i)
+    {
+      labels[i] = new ParameterLabel(i);
 
-            this.ObjIdslotsTab.add(labels[i]);
-        }
+      if (!loadSuccess)
+      {
+        labels[i].setMinimumSize(dim);
+        labels[i].setPreferredSize(dim);
+        labels[i].setMaximumSize(dim);
+        labels[i].setOpaque(true);
+        labels[i].setBackground(Color.WHITE);
+        labels[i].setForeground(Color.GREEN);
+        labels[i].setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+      }
+      else
+      {
+        labels[i] = reg.getLabels(i);
+      }
+
+      this.ObjIdslotsTab.add(labels[i]);
+    }
 
     parameterTable.setModel(parameterTableData);
     aggregationTable.setModel(aggregationTableData);
@@ -284,13 +318,16 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     parameterTable.getTableHeader().setReorderingAllowed(false);
     aggregationTable.getTableHeader().setReorderingAllowed(false);
     parameterSetsTable.getTableHeader().setReorderingAllowed(false);
-    
+
     for (int i = 0; i < parameterTable.getRowCount(); i++)  // Set all the enable fields on the parameter table to false
-        parameterTable.setValueAt(false, i, 5);
+    {
+      parameterTable.setValueAt(false, i, 5);
+    }
 
     for (int i = 0; i < aggregationTable.getRowCount(); i++) // Set all the enable fields on the aggregation table to false
-        aggregationTable.setValueAt(false, i, 4);
-    
+    {
+      aggregationTable.setValueAt(false, i, 4);
+    }
 
     // Set window size for the Add and Modify Parameter Definition
     editParameter.setSize(400, 500);
@@ -348,104 +385,120 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     }
   }
 
-  public AggregationDefinitionDetails makeNewAggregationDefinition(String name, String description, AggregationCategory category, boolean generationEnabled, 
-          float updateInterval, boolean filterEnabled, float filteredTimeout, AggregationParameterSetList parameterSets){
-      AggregationDefinitionDetails aDef = new AggregationDefinitionDetails();
+  public AggregationDefinitionDetails makeNewAggregationDefinition(String name, String description, AggregationCategory category, boolean generationEnabled,
+                                                                   float updateInterval, boolean filterEnabled, float filteredTimeout, AggregationParameterSetList parameterSets)
+  {
+    AggregationDefinitionDetails aDef = new AggregationDefinitionDetails();
 
-      aDef.setName(new Identifier(name));
-      aDef.setDescription(description);
-      aDef.setCategory(category);
-      aDef.setGenerationEnabled(generationEnabled);
+    aDef.setName(new Identifier(name));
+    aDef.setDescription(description);
+    aDef.setCategory(category);
+    aDef.setGenerationEnabled(generationEnabled);
 
-             
-      aDef.setUpdateInterval( makeDuration(updateInterval) );
+    aDef.setUpdateInterval(makeDuration(updateInterval));
 
-      aDef.setFilterEnabled(filterEnabled);  // shall not matter, because when we add it it will be false!
-      aDef.setFilteredTimeout( makeDuration(filteredTimeout) ) ;
-      aDef.setParameterSets(parameterSets);
-      
-      return aDef;
+    aDef.setFilterEnabled(filterEnabled);  // shall not matter, because when we add it it will be false!
+    aDef.setFilteredTimeout(makeDuration(filteredTimeout));
+    aDef.setParameterSets(parameterSets);
+
+    return aDef;
   }
 
   @SuppressWarnings("cast")
-  public Duration makeDuration(double input){
-      Duration durationOne = new Duration(1);
-      Object value = durationOne.getValue();
+  public Duration makeDuration(double input)
+  {
+    Duration durationOne = new Duration(1);
+    Object value = durationOne.getValue();
 
 //      return new Duration((int) Math.round(input));  // Then it is an int! (round the number before)
-      return new Duration(input);
+    return new Duration(input);
   }
 
-  public ParameterDefinitionDetails makeNewParameterDefinition(String name, int rawType, String rawUnit, String description, 
-          boolean generationEnabled, float interval, ParameterExpression validityExpression, ParameterConversion conversion){
-      ParameterDefinitionDetails PDef = new ParameterDefinitionDetails();
+  public ParameterDefinitionDetails makeNewParameterDefinition(String name, int rawType, String rawUnit, String description,
+                                                               boolean generationEnabled, float interval, ParameterExpression validityExpression, ParameterConversion conversion)
+  {
+    ParameterDefinitionDetails PDef = new ParameterDefinitionDetails();
 
-      PDef.setName(new Identifier(name));
-      PDef.setDescription(description);
-      PDef.setRawType((byte) rawType);
-      PDef.setRawUnit(rawUnit);
-      PDef.setDescription(description);
-      PDef.setGenerationEnabled(generationEnabled);  // shall not matter, because when we add it it will be false!
-      PDef.setUpdateInterval( makeDuration(interval ) ) ;
-      PDef.setValidityExpression(validityExpression);
-      PDef.setConversion(conversion);
-      
-      return PDef;
+    PDef.setName(new Identifier(name));
+    PDef.setDescription(description);
+    PDef.setRawType((byte) rawType);
+    PDef.setRawUnit(rawUnit);
+    PDef.setDescription(description);
+    PDef.setGenerationEnabled(generationEnabled);  // shall not matter, because when we add it it will be false!
+    PDef.setUpdateInterval(makeDuration(interval));
+    PDef.setValidityExpression(validityExpression);
+    PDef.setConversion(conversion);
+
+    return PDef;
   }
 
-  public AggregationParameterSetList makeNewAggregationParameterSetList(){
-      AggregationParameterSetList aggRefList = new AggregationParameterSetList();
+  public AggregationParameterSetList makeNewAggregationParameterSetList()
+  {
+    AggregationParameterSetList aggRefList = new AggregationParameterSetList();
 
-      for (int i=0; i< parameterSetsTableData.getRowCount(); i++){
-          AggregationParameterSet aggRef = new AggregationParameterSet();
-          aggRef.setDomain(domain);
-          LongList longList = new LongList();
-          longList.add(getObjIdFromName (parameterSetsTableData.getValueAt(i, 0).toString()));
-          aggRef.setParameters(longList);
-          aggRef.setSampleInterval( makeDuration(Float.parseFloat( parameterSetsTableData.getValueAt(i, 1).toString() )) );
-          if (parameterSetsTableData.getValueAt(i, 2).equals("-") ){
-              aggRef.setPeriodicFilter(null);
-          }else{
-              ThresholdFilter periodicFilter = new ThresholdFilter();
-              periodicFilter.setThresholdType(ThresholdType.fromString(parameterSetsTableData.getValueAt(i, 2).toString()));
-              periodicFilter.setThresholdValue( makeDuration(Float.parseFloat(parameterSetsTableData.getValueAt(i, 3).toString() )) );
-              aggRef.setPeriodicFilter(periodicFilter);
-          }
-          aggRefList.add(aggRef);
+    for (int i = 0; i < parameterSetsTableData.getRowCount(); i++)
+    {
+      AggregationParameterSet aggRef = new AggregationParameterSet();
+      aggRef.setDomain(domain);
+      LongList longList = new LongList();
+      longList.add(getObjIdFromName(parameterSetsTableData.getValueAt(i, 0).toString()));
+      aggRef.setParameters(longList);
+      aggRef.setSampleInterval(makeDuration(Float.parseFloat(parameterSetsTableData.getValueAt(i, 1).toString())));
+      if (parameterSetsTableData.getValueAt(i, 2).equals("-"))
+      {
+        aggRef.setPeriodicFilter(null);
       }
-      
-      return aggRefList;
-  }
-  
-  // Get ObjId from Name
-  private Long getObjIdFromName(String name){
-      for(int i = 0; i<parameterTableData.getRowCount(); i++){
-          String parameter = parameterTableData.getValueAt(i, 1).toString();
-          if (parameter.equals(name))
-              return new Long(parameterTableData.getValueAt(i, 0).toString());
+      else
+      {
+        ThresholdFilter periodicFilter = new ThresholdFilter();
+        periodicFilter.setThresholdType(ThresholdType.fromString(parameterSetsTableData.getValueAt(i, 2).toString()));
+        periodicFilter.setThresholdValue(makeDuration(Float.parseFloat(parameterSetsTableData.getValueAt(i, 3).toString())));
+        aggRef.setPeriodicFilter(periodicFilter);
       }
-      return null; // Not found (it shouldn't occur...)
+      aggRefList.add(aggRef);
+    }
+
+    return aggRefList;
   }
 
   // Get ObjId from Name
-  private Long getParameterSetsObjIdFromAggNameAndIndex(String name, int index){
-      for(int i = 0; i < aggregationTableData.getRowCount(); i++){
-          String aggregation = aggregationTableData.getValueAt(i, 1).toString();
-          if (aggregation.equals(name) && index <= parameterSetsTableDataAll.get(i).getRowCount())
-              return getObjIdFromName(parameterSetsTableDataAll.get(i).getValueAt(index, 0).toString());
+  private Long getObjIdFromName(String name)
+  {
+    for (int i = 0; i < parameterTableData.getRowCount(); i++)
+    {
+      String parameter = parameterTableData.getValueAt(i, 1).toString();
+      if (parameter.equals(name))
+      {
+        return new Long(parameterTableData.getValueAt(i, 0).toString());
       }
-      return null; // Not found (it shouldn't occur...)
+    }
+    return null; // Not found (it shouldn't occur...)
   }
 
-  public ParameterExpression makeNewParameterExpression(Long instId, int operator, Boolean useConverted, String value){
-      ParameterExpression PExp = new ParameterExpression();
-      
-      PExp.setParameterId(new ObjectKey(domain, instId));
-      PExp.setOperator(ExpressionOperator.fromOrdinal(operator));
-      PExp.setUseConverted(useConverted);
-      PExp.setValue(new Union(value));
-      
-      return PExp;
+  // Get ObjId from Name
+  private Long getParameterSetsObjIdFromAggNameAndIndex(String name, int index)
+  {
+    for (int i = 0; i < aggregationTableData.getRowCount(); i++)
+    {
+      String aggregation = aggregationTableData.getValueAt(i, 1).toString();
+      if (aggregation.equals(name) && index <= parameterSetsTableDataAll.get(i).getRowCount())
+      {
+        return getObjIdFromName(parameterSetsTableDataAll.get(i).getValueAt(index, 0).toString());
+      }
+    }
+    return null; // Not found (it shouldn't occur...)
+  }
+
+  public ParameterExpression makeNewParameterExpression(Long instId, int operator, Boolean useConverted, String value)
+  {
+    ParameterExpression PExp = new ParameterExpression();
+
+    PExp.setParameterId(new ObjectKey(domain, instId));
+    PExp.setOperator(ExpressionOperator.fromOrdinal(operator));
+    PExp.setUseConverted(useConverted);
+    PExp.setValue(new Union(value));
+
+    return PExp;
   }
 
   private void init() throws MALException, MalformedURLException
@@ -465,6 +518,7 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
 
     startService();
 
+    pictureLabel.setIcon(map.getCurrentImage());
   }
 
   private void startService() throws MALException, MalformedURLException
@@ -485,34 +539,34 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     final String Aggregationtburi = System.getProperty("AggregationBroker");
 
     tmConsumer = consumerMgr.createConsumer((String) null,
-            new URI(Parametertpuri),
-            new URI(Parametertburi),
-            ParameterHelper.PARAMETER_SERVICE,
-            new Blob("".getBytes()),
-            domain,
-            network,
-            session,
-            sessionName,
-            QoSLevel.ASSURED,
-            System.getProperties(),
-            new UInteger(0));
+                                            new URI(Parametertpuri),
+                                            new URI(Parametertburi),
+                                            ParameterHelper.PARAMETER_SERVICE,
+                                            new Blob("".getBytes()),
+                                            domain,
+                                            network,
+                                            session,
+                                            sessionName,
+                                            QoSLevel.ASSURED,
+                                            System.getProperties(),
+                                            new UInteger(0));
 
     tmConsumer1 = consumerMgr.createConsumer((String) null,
-            new URI(Aggregationtpuri),
-            new URI(Aggregationtburi),
-            AggregationHelper.AGGREGATION_SERVICE,
-            new Blob("".getBytes()),
-            domain,
-            network,
-            session,
-            sessionName,
-            QoSLevel.ASSURED,
-            System.getProperties(),
-            new UInteger(0));
+                                             new URI(Aggregationtpuri),
+                                             new URI(Aggregationtburi),
+                                             AggregationHelper.AGGREGATION_SERVICE,
+                                             new Blob("".getBytes()),
+                                             domain,
+                                             network,
+                                             session,
+                                             sessionName,
+                                             QoSLevel.ASSURED,
+                                             System.getProperties(),
+                                             new UInteger(0));
 
     parameterService = new ParameterStub(tmConsumer);
     aggregationService = new AggregationStub(tmConsumer1);
-    
+
   }
 
   private void registerSubscription()
@@ -543,25 +597,29 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     final String configFile = System.getProperty("providerURI.properties", "demoServiceURI.properties");
     final java.io.File file = new java.io.File(configFile);
     if (file.exists())
+    {
       sysProps.putAll(StructureHelper.loadProperties(file.toURI().toURL(), "providerURI.properties"));
+    }
 
-    if (!uri1.getText().equals("") && !uri2.getText().equals("") &&
-        !uri3.getText().equals("") && !uri4.getText().equals("")     ){
-            System.setProperty("ParameterURI",      uri1.getText());
-            System.setProperty("ParameterBroker",   uri2.getText());
-            System.setProperty("AggregationURI",    uri3.getText());
-            System.setProperty("AggregationBroker", uri4.getText());
+    if (!uri1.getText().equals("") && !uri2.getText().equals("")
+            && !uri3.getText().equals("") && !uri4.getText().equals(""))
+    {
+      System.setProperty("ParameterURI", uri1.getText());
+      System.setProperty("ParameterBroker", uri2.getText());
+      System.setProperty("AggregationURI", uri3.getText());
+      System.setProperty("AggregationBroker", uri4.getText());
     }
 
     System.setProperties(sysProps);
 
     // Initial fillng of the text boxes
-    if (uri1.getText().equals("") && uri2.getText().equals("") &&
-        uri3.getText().equals("") && uri4.getText().equals("")     ){
-            uri1.setText(System.getProperty("ParameterURI"));
-            uri2.setText(System.getProperty("ParameterBroker"));
-            uri3.setText(System.getProperty("AggregationURI"));
-            uri4.setText(System.getProperty("AggregationBroker"));
+    if (uri1.getText().equals("") && uri2.getText().equals("")
+            && uri3.getText().equals("") && uri4.getText().equals(""))
+    {
+      uri1.setText(System.getProperty("ParameterURI"));
+      uri2.setText(System.getProperty("ParameterBroker"));
+      uri3.setText(System.getProperty("AggregationURI"));
+      uri4.setText(System.getProperty("AggregationBroker"));
     }
   }
 
@@ -569,11 +627,11 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   {
     @Override
     public void monitorValueNotifyReceived(final MALMessageHeader msgHeader,
-            final Identifier lIdentifier,
-            final UpdateHeaderList lUpdateHeaderList,
-            final ObjectIdList lObjectIdList,
-            final ParameterValueList lParameterValueList,
-            final Map qosp)
+                                           final Identifier lIdentifier,
+                                           final UpdateHeaderList lUpdateHeaderList,
+                                           final ObjectIdList lObjectIdList,
+                                           final ParameterValueList lParameterValueList,
+                                           final Map qosp)
     {
       LOGGER.log(Level.INFO, "Received update parameters list of size : {0}", lObjectIdList.size());
       final long iDiff = System.currentTimeMillis() - msgHeader.getTimestamp().getValue();
@@ -587,27 +645,25 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
         try
         {
           final int objId = updateHeader.getKey().getSecondSubKey().intValue();
-          
-          final int index = (int) ((5*numberOfColumns)*Math.floor (objId/(5)) + objId%numberOfColumns);
 
+          final int index = (int) ((5 * numberOfColumns) * Math.floor(objId / (5)) + objId % numberOfColumns);
 
 //          pictureLabel.setIcon(map.addCoordinate(+37.0620, -7.8070));
-
           if ((0 <= index) && (index < labels.length))
           {
             UOctet validityState = parameterValue.getInvalidSubState();
 //            Validity validityString = Validity.fromNumericValue(new UInteger(validityState.getValue()));
             Union rawValue = (Union) parameterValue.getRawValue();
-            
+
             Union convertedValue = (Union) parameterValue.getConvertedValue();
-            String convertedValueStr = (convertedValue == null) ? "null" : convertedValue.getDoubleValue().toString() ;
-            
-            labels[index+0*numberOfColumns].setNewValue( String.valueOf(objId)  , iDiff);
+            String convertedValueStr = (convertedValue == null) ? "null" : convertedValue.getDoubleValue().toString();
+
+            labels[index + 0 * numberOfColumns].setNewValue(String.valueOf(objId), iDiff);
 //            labels[index+1*numberOfColumns].setNewValue( validityString.toString() , iDiff);
-            labels[index+1*numberOfColumns].setNewValue( validityState.toString() , iDiff);
-            labels[index+2*numberOfColumns].setNewValue( rawValue.toString() , iDiff);
-            labels[index+3*numberOfColumns].setNewValue( convertedValueStr , iDiff);
-            
+            labels[index + 1 * numberOfColumns].setNewValue(validityState.toString(), iDiff);
+            labels[index + 2 * numberOfColumns].setNewValue(rawValue.toString(), iDiff);
+            labels[index + 3 * numberOfColumns].setNewValue(convertedValueStr, iDiff);
+
             // Aggregation Map
 //            if (!labels[12].getText().equals("") && !labels[13].getText().equals("") )
 //                pictureLabel.setIcon(map.addCoordinate(Double.valueOf(labels[12].getText()), Double.valueOf(labels[13].getText()) ));
@@ -625,11 +681,11 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   {
     @Override
     public void monitorValueNotifyReceived(final MALMessageHeader msgHeader,
-            final Identifier lIdentifier,
-            final UpdateHeaderList lUpdateHeaderList,
-            final ObjectIdList lObjectIdList,
-            final AggregationValueList lAggregationValueList,
-            final Map qosp)
+                                           final Identifier lIdentifier,
+                                           final UpdateHeaderList lUpdateHeaderList,
+                                           final ObjectIdList lObjectIdList,
+                                           final AggregationValueList lAggregationValueList,
+                                           final Map qosp)
     {
       LOGGER.log(Level.INFO, "Received update aggregations list of size : {0}", lObjectIdList.size());
       final long iDiff = System.currentTimeMillis() - msgHeader.getTimestamp().getValue();
@@ -638,67 +694,89 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
       final String Aggname = updateHeader.getKey().getFirstSubKey().getValue();
       final int objId = updateHeader.getKey().getSecondSubKey().intValue();
 
-      try{
-        if (msgBoxOn.isSelected() && lUpdateHeaderList.size() != 0 && lAggregationValueList.size() != 0){
-            String str = "";
-            final AggregationValue aggregationValue = lAggregationValueList.get(0);
-            str += "AggregationValue generationMode: " + aggregationValue.getGenerationMode().toString() + " (filtered: " + aggregationValue.getFiltered().toString() + ")" + "\n";
-            
-            str += "Aggregation objId " + objId + " (name: " + Aggname + "):" + "\n";
+      try
+      {
+        if (msgBoxOn.isSelected() && lUpdateHeaderList.size() != 0 && lAggregationValueList.size() != 0)
+        {
+          String str = "";
+          final AggregationValue aggregationValue = lAggregationValueList.get(0);
+          str += "AggregationValue generationMode: " + aggregationValue.getGenerationMode().toString() + " (filtered: " + aggregationValue.getFiltered().toString() + ")" + "\n";
 
-            for(int i=0; i < aggregationValue.getParameterSetValues().size(); i++){  // Cycle through parameterSetValues
-                str += "- AggregationParameterSet values index: " + i + "\n";
-                str += "deltaTime: " + aggregationValue.getParameterSetValues().get(i).getDeltaTime();
-                str += " and intervalTime: " + aggregationValue.getParameterSetValues().get(i).getIntervalTime() + "\n";
-                AggregationSetValue parameterSetsValue = aggregationValue.getParameterSetValues().get(i);
+          str += "Aggregation objId " + objId + " (name: " + Aggname + "):" + "\n";
 
-                for(int j=0; j < parameterSetsValue.getValues().size(); j++){ // Cycle through the values
-                    if (parameterSetsValue.getValues().get(j) == null)
-                        continue;
-                    str += "values index: " + j + "\n";
-                    str += "validityState: " + parameterSetsValue.getValues().get(j).getInvalidSubState().toString() + "\n";
-                    if (parameterSetsValue.getValues().get(j).getRawValue() != null)
-                        str += "rawValue: " + parameterSetsValue.getValues().get(j).getRawValue().toString() + "\n";
-                    if (parameterSetsValue.getValues().get(j).getConvertedValue() != null)
-                        str += "convertedValue: " + parameterSetsValue.getValues().get(j).getConvertedValue().toString() + "\n";
-                    str += "\n";
-                }
+          for (int i = 0; i < aggregationValue.getParameterSetValues().size(); i++)
+          {  // Cycle through parameterSetValues
+            str += "- AggregationParameterSet values index: " + i + "\n";
+            str += "deltaTime: " + aggregationValue.getParameterSetValues().get(i).getDeltaTime();
+            str += " and intervalTime: " + aggregationValue.getParameterSetValues().get(i).getIntervalTime() + "\n";
+            AggregationSetValue parameterSetsValue = aggregationValue.getParameterSetValues().get(i);
+
+            for (int j = 0; j < parameterSetsValue.getValues().size(); j++)
+            { // Cycle through the values
+              if (parameterSetsValue.getValues().get(j) == null)
+              {
+                continue;
+              }
+              str += "values index: " + j + "\n";
+              str += "validityState: " + parameterSetsValue.getValues().get(j).getInvalidSubState().toString() + "\n";
+              if (parameterSetsValue.getValues().get(j).getRawValue() != null)
+              {
+                str += "rawValue: " + parameterSetsValue.getValues().get(j).getRawValue().toString() + "\n";
+              }
+              if (parameterSetsValue.getValues().get(j).getConvertedValue() != null)
+              {
+                str += "convertedValue: " + parameterSetsValue.getValues().get(j).getConvertedValue().toString() + "\n";
+              }
+              str += "\n";
             }
-            
-            JOptionPane.showMessageDialog(null, str, "Returned Values from the Provider", JOptionPane.PLAIN_MESSAGE);
+          }
+
+          JOptionPane.showMessageDialog(null, str, "Returned Values from the Provider", JOptionPane.PLAIN_MESSAGE);
         }
 
-        if (Aggname.equals("Map")){
-            for (int i = 0; i < lAggregationValueList.get(0).getParameterSetValues().size(); i++ ){
-                if (getParameterSetsObjIdFromAggNameAndIndex(Aggname, i) == null || lAggregationValueList.get(0).getParameterSetValues().get(i).getValues().get(0) == null) // Not found... :/
-                    continue;
-                
-                // Is it the latitude parameter?
-                if ( getParameterSetsObjIdFromAggNameAndIndex(Aggname, i).equals(getObjIdFromName("GPS.Latitude")) )
-                    mapLatitude = Double.parseDouble(lAggregationValueList.get(0).getParameterSetValues().get(i).getValues().get(0).getRawValue().toString());
-
-                // Is it the longitude parameter?
-                if ( getParameterSetsObjIdFromAggNameAndIndex(Aggname, i).equals(getObjIdFromName("GPS.Longitude")) )
-                    mapLongitude = Double.parseDouble(lAggregationValueList.get(0).getParameterSetValues().get(i).getValues().get(0).getRawValue().toString());
-                    
-                if (mapLatitude != 0 && mapLongitude != 0 ){  // So, it's still the same message?
-                    pictureLabel.setIcon(map.addCoordinate(mapLatitude, mapLongitude));
-                    break;
-                }
+        if (Aggname.equals("Map"))
+        {
+          for (int i = 0; i < lAggregationValueList.get(0).getParameterSetValues().size(); i++)
+          {
+            if (getParameterSetsObjIdFromAggNameAndIndex(Aggname, i) == null || lAggregationValueList.get(0).getParameterSetValues().get(i).getValues().get(0) == null) // Not found... :/
+            {
+              continue;
             }
-            mapLatitude = 0;
-            mapLongitude = 0;
+
+            // Is it the latitude parameter?
+            if (getParameterSetsObjIdFromAggNameAndIndex(Aggname, i).equals(getObjIdFromName("GPS.Latitude")))
+            {
+              mapLatitude = Double.parseDouble(lAggregationValueList.get(0).getParameterSetValues().get(i).getValues().get(0).getRawValue().toString());
+            }
+
+            // Is it the longitude parameter?
+            if (getParameterSetsObjIdFromAggNameAndIndex(Aggname, i).equals(getObjIdFromName("GPS.Longitude")))
+            {
+              mapLongitude = Double.parseDouble(lAggregationValueList.get(0).getParameterSetValues().get(i).getValues().get(0).getRawValue().toString());
+            }
+
+            if (mapLatitude != 0 && mapLongitude != 0)
+            {  // So, it's still the same message?
+              map.addCoordinate(mapLatitude, mapLongitude);
+              pictureLabel.setIcon(map.getCurrentImage());
+              break;
+            }
+          }
+          mapLatitude = 0;
+          mapLongitude = 0;
         }
-        
-    }catch (NumberFormatException ex){
+
+      }
+      catch (NumberFormatException ex)
+      {
         LOGGER.log(Level.WARNING, "Error decoding update with name: {0}", lUpdateHeaderList.get(0).getKey().getFirstSubKey().getValue());
-        }
+      }
     }
   }
-  
+
   /**
-   * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The
-   * content of this method is always regenerated by the Form Editor.
+   * This method is called from within the constructor to initialize the form. WARNING: Do NOT modify this code. The content of this
+   * method is always regenerated by the Form Editor.
    */
   @SuppressWarnings("unchecked")
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -831,9 +909,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     jLabel24 = new javax.swing.JLabel();
     jSeparator11 = new javax.swing.JSeparator();
     pictureLabel = new javax.swing.JLabel();
-    jToolBar1 = new javax.swing.JToolBar();
-    jLabel1 = new javax.swing.JLabel();
-    delayLabel = new javax.swing.JLabel();
     jMenuBar1 = new javax.swing.JMenuBar();
     jMenu1 = new javax.swing.JMenu();
     quitMenuItem = new javax.swing.JMenuItem();
@@ -1917,21 +1992,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
 
     getContentPane().add(tabs, java.awt.BorderLayout.CENTER);
 
-    jToolBar1.setBorder(javax.swing.BorderFactory.createEtchedBorder(javax.swing.border.EtchedBorder.RAISED));
-    jToolBar1.setFloatable(false);
-    jToolBar1.setRollover(true);
-    jToolBar1.setName("jToolBar1"); // NOI18N
-
-    jLabel1.setText("Average Delay:");
-    jLabel1.setName("jLabel1"); // NOI18N
-    jToolBar1.add(jLabel1);
-
-    delayLabel.setText("0.0");
-    delayLabel.setName("delayLabel"); // NOI18N
-    jToolBar1.add(delayLabel);
-
-    getContentPane().add(jToolBar1, java.awt.BorderLayout.NORTH);
-
     jMenuBar1.setName("jMenuBar1"); // NOI18N
 
     jMenu1.setText("File");
@@ -2029,11 +2089,12 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     pack();
   }// </editor-fold>//GEN-END:initComponents
 
-    private void save2File(){
-        Registers reg = new Registers();
-        reg.save(this);
-    }
-    
+  private void save2File()
+  {
+    Registers reg = new Registers();
+    reg.save(this);
+  }
+
     private void quitMenuItemActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_quitMenuItemActionPerformed
     {//GEN-HEADEREND:event_quitMenuItemActionPerformed
       try
@@ -2044,14 +2105,18 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
         if (null != tmConsumer && null != tmConsumer1)
         {
           deregMenuItemActionPerformed(null);
-          tmConsumer.close(); 
+          tmConsumer.close();
           tmConsumer1.close();
         }
         if (null != consumerMgr)
+        {
           consumerMgr.close();
+        }
 
         if (null != mal)
+        {
           mal.close();
+        }
 
       }
       catch (MALException ex)
@@ -2063,304 +2128,346 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     }//GEN-LAST:event_quitMenuItemActionPerformed
 
     private void removeDefinitionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeDefinitionButtonActionPerformed
-        
-        try
-        {
-        if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
 
+      try
+      {
+        if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
+        {
+          return;  // Well, then nothing to be done here folks!
+        }
         LOGGER.info("removeDefinition started");
-        
+
         Long objId = new Long(parameterTable.getValueAt(parameterTable.getSelectedRow(), 0).toString());
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         parameterService.removeDefinition(longlist);
         LOGGER.info("removeDefinition executed");
-        
-        for (Long longlist1 : longlist) {
-            final int slot = longlist1.intValue();
-            final int index = (int) ((5*numberOfColumns)*Math.floor (slot/(5)) + slot%numberOfColumns);
-            labels[index + 0*numberOfColumns].setRed();
-            labels[index + 1*numberOfColumns].setRed();
-            labels[index + 2*numberOfColumns].setRed();
-            labels[index + 3*numberOfColumns].setRed();
+
+        for (Long longlist1 : longlist)
+        {
+          final int slot = longlist1.intValue();
+          final int index = (int) ((5 * numberOfColumns) * Math.floor(slot / (5)) + slot % numberOfColumns);
+          labels[index + 0 * numberOfColumns].setRed();
+          labels[index + 1 * numberOfColumns].setRed();
+          labels[index + 2 * numberOfColumns].setRed();
+          labels[index + 3 * numberOfColumns].setRed();
         }
-        
+
         parameterTableData.removeRow(parameterTable.getSelectedRow());
         this.save2File();
 
-        }
-        catch (MALException | MALInteractionException ex){
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
-        this.save2File();
+      this.save2File();
     }//GEN-LAST:event_removeDefinitionButtonActionPerformed
 
     private void enableDefinitionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableDefinitionButtonActionPerformed
-        if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
-
-        try
-        {
+      if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
+      {
+        return;  // Well, then nothing to be done here folks!
+      }
+      try
+      {
         LOGGER.info("enableGeneration started");
-        
+
         Long objId = new Long(parameterTable.getValueAt(parameterTable.getSelectedRow(), 0).toString());
         String str = parameterTable.getValueAt(parameterTable.getSelectedRow(), 5).toString();
         Boolean curState = (str.equals("true")); // String to Boolean conversion
         InstanceBooleanPairList BoolPairList = new InstanceBooleanPairList();
-        BoolPairList.add(new InstanceBooleanPair( objId, !curState) ); 
-      
+        BoolPairList.add(new InstanceBooleanPair(objId, !curState));
+
         parameterService.enableGeneration(false, BoolPairList);
         LOGGER.info("enableGeneration executed");
-        
+
         parameterTable.setValueAt(!curState, parameterTable.getSelectedRow(), 5);
         this.save2File();
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
     }//GEN-LAST:event_enableDefinitionButtonActionPerformed
 
     private void listDefinitionAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listDefinitionAllButtonActionPerformed
-      try {
-      LOGGER.info("listDefinition(\"*\") started");
-      IdentifierList IdList = new IdentifierList();
-      IdList.add(new Identifier ("*"));
+      try
+      {
+        LOGGER.info("listDefinition(\"*\") started");
+        IdentifierList IdList = new IdentifierList();
+        IdList.add(new Identifier("*"));
 
-      LongList output = parameterService.listDefinition(IdList);
+        LongList output = parameterService.listDefinition(IdList);
 
-      String str = "Object instance identifiers on the provider: \n";
-          for (Long output1 : output)
-              str += output1.toString() + "\n";
+        String str = "Object instance identifiers on the provider: \n";
+        for (Long output1 : output)
+        {
+          str += output1.toString() + "\n";
+        }
 
-      JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
-      LOGGER.log(Level.INFO, "listDefinition(\"*\") returned {0} object instance identifiers", output.size());
-          
-      } catch (MALInteractionException | MALException ex) {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+        JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
+        LOGGER.log(Level.INFO, "listDefinition(\"*\") returned {0} object instance identifiers", output.size());
+
+      }
+      catch (MALInteractionException | MALException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
       }
     }//GEN-LAST:event_listDefinitionAllButtonActionPerformed
 
     private void addDefinitionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefinitionButtonActionPerformed
-        titleEditParameter.setText("Add a new Parameter Definition");
-        nameTF.setText("");
-        descriptionTF.setText("");
-        rawTypeCB.setSelectedIndex(5);  // Double
-        rawUnitTF.setText("");
-        updateIntervalTF.setText("");
-        generationEnabledCB.setSelected(false);
-        generationEnabledCB.setEnabled(false);
-        validityExpressionCB.setSelected(false);
-        validityExpressionCBActionPerformed(null);
-        
-        refreshParametersComboBox();
-        isAddDef = true;
-        editParameter.setVisible(true);
-        
+      titleEditParameter.setText("Add a new Parameter Definition");
+      nameTF.setText("");
+      descriptionTF.setText("");
+      rawTypeCB.setSelectedIndex(5);  // Double
+      rawUnitTF.setText("");
+      updateIntervalTF.setText("");
+      generationEnabledCB.setSelected(false);
+      generationEnabledCB.setEnabled(false);
+      validityExpressionCB.setSelected(false);
+      validityExpressionCBActionPerformed(null);
+
+      refreshParametersComboBox();
+      isAddDef = true;
+      editParameter.setVisible(true);
+
     }//GEN-LAST:event_addDefinitionButtonActionPerformed
 
   @SuppressWarnings("unchecked")
-    private void refreshParametersComboBox(){
-        validity1.removeAllItems();
-        parameterCB1.removeAllItems();
-        for (int i = 0; i < parameterTableData.getRowCount(); i++ ){
-            validity1.addItem(parameterTableData.getValueAt(i, 1));
-            parameterCB1.addItem(parameterTableData.getValueAt(i, 1));
-        }
-
+  private void refreshParametersComboBox()
+  {
+    validity1.removeAllItems();
+    parameterCB1.removeAllItems();
+    for (int i = 0; i < parameterTableData.getRowCount(); i++)
+    {
+      validity1.addItem(parameterTableData.getValueAt(i, 1));
+      parameterCB1.addItem(parameterTableData.getValueAt(i, 1));
     }
-    
+
+  }
+
     private void generationEnabledCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generationEnabledCBActionPerformed
         // TODO add your handling code here:
-        
+
     }//GEN-LAST:event_generationEnabledCBActionPerformed
 
-    
-    
+
     private void submitButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButtonActionPerformed
 
-        if (nameTF.getText().equals("") ||
-            descriptionTF.getText().equals("") ||
-            descriptionTF.getText().equals("") ||
-            rawTypeCB.getSelectedIndex() == 0 ||
-            rawUnitTF.getText().equals("")     ||
-            updateIntervalTF.getText().equals("")  ){
-                JOptionPane.showMessageDialog(null, "Please fill-in all the necessary fields!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-                return;
+      if (nameTF.getText().equals("")
+              || descriptionTF.getText().equals("")
+              || descriptionTF.getText().equals("")
+              || rawTypeCB.getSelectedIndex() == 0
+              || rawUnitTF.getText().equals("")
+              || updateIntervalTF.getText().equals(""))
+      {
+        JOptionPane.showMessageDialog(null, "Please fill-in all the necessary fields!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+        return;
+      }
+
+      try
+      {
+        Double.parseDouble(updateIntervalTF.getText());  // Check if it is a number
+      }
+      catch (NumberFormatException nfe)
+      {
+        JOptionPane.showMessageDialog(null, "updateInterval is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+        return;
+      }
+
+      ParameterExpression PExp;
+      if (validityExpressionCB.isSelected())
+      {
+        if (validity2.getSelectedIndex() != -1 && !validity3.getText().equals(""))
+        {
+          Long instIs = new Long(parameterTableData.getValueAt(validity1.getSelectedIndex(), 0).toString());
+          PExp = makeNewParameterExpression(instIs, validity2.getSelectedIndex(), validity4.isSelected(), validity3.getText());
         }
-        
-        try{   Double.parseDouble(updateIntervalTF.getText());  // Check if it is a number
-        }catch(NumberFormatException nfe)   {  
-            JOptionPane.showMessageDialog(null, "updateInterval is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-            return;  
-        }  
-
-            ParameterExpression PExp;
-        if (validityExpressionCB.isSelected() ){
-            if (validity2.getSelectedIndex() != -1 && !validity3.getText().equals("")){
-                Long instIs = new Long(parameterTableData.getValueAt(validity1.getSelectedIndex(), 0).toString());
-                PExp = makeNewParameterExpression( instIs, validity2.getSelectedIndex(), validity4.isSelected() , validity3.getText() );
-            }else{
-                JOptionPane.showMessageDialog(null, "Please select an operator and a value!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-                return;
-            }
-        }else{
-            PExp = null;
+        else
+        {
+          JOptionPane.showMessageDialog(null, "Please select an operator and a value!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+          return;
         }
+      }
+      else
+      {
+        PExp = null;
+      }
 
-            
-        ParameterDefinitionDetails Pdef;
-        Pdef = makeNewParameterDefinition(nameTF.getText(),
-                rawTypeCB.getSelectedIndex(), 
-                rawUnitTF.getText(), 
-                descriptionTF.getText(), 
-                generationEnabledCB.isSelected(), 
-                Float.parseFloat(updateIntervalTF.getText()),
-                PExp,
-                null );
-        
-        ParameterDefinitionDetailsList PDefs = new ParameterDefinitionDetailsList();
-        PDefs.add(Pdef);
+      ParameterDefinitionDetails Pdef;
+      Pdef = makeNewParameterDefinition(nameTF.getText(),
+                                        rawTypeCB.getSelectedIndex(),
+                                        rawUnitTF.getText(),
+                                        descriptionTF.getText(),
+                                        generationEnabledCB.isSelected(),
+                                        Float.parseFloat(updateIntervalTF.getText()),
+                                        PExp,
+                                        null);
 
-        editParameter.setVisible(false);
-             
-    try
-    {
-        if (isAddDef){  // Are we adding a new definition?
+      ParameterDefinitionDetailsList PDefs = new ParameterDefinitionDetailsList();
+      PDefs.add(Pdef);
+
+      editParameter.setVisible(false);
+
+      try
+      {
+        if (isAddDef)
+        {  // Are we adding a new definition?
           LOGGER.info("addDefinition started");
           LongList output = parameterService.addDefinition(PDefs);
           LOGGER.log(Level.INFO, "addDefinition returned {0} object instance identifiers", output.size());
           parameterTableData.addRow(
-            new Object [] {output.get(0).intValue(), Pdef.getName(), Pdef.getDescription(), 
-                rawTypeCB.getItemAt(Pdef.getRawType()).toString(), Pdef.getRawUnit(), Pdef.getGenerationEnabled(), Pdef.getUpdateInterval().getValue()}
-            );
-        }else{  // Well, then we are updating a previous selected definition
+                  new Object[]
+                  {
+                    output.get(0).intValue(), Pdef.getName(), Pdef.getDescription(),
+                    rawTypeCB.getItemAt(Pdef.getRawType()).toString(), Pdef.getRawUnit(), Pdef.getGenerationEnabled(), Pdef.getUpdateInterval().getValue()
+                  }
+          );
+        }
+        else
+        {  // Well, then we are updating a previous selected definition
           LOGGER.info("updateDefinition started");
           LongList objIds = new LongList();
           objIds.add(new Long(parameterTableData.getValueAt(parameterDefinitionSelectedIndex, 0).toString()));
           parameterService.updateDefinition(objIds, PDefs);  // Execute the update
           parameterTableData.removeRow(parameterDefinitionSelectedIndex);
-          parameterTableData.insertRow(parameterDefinitionSelectedIndex, 
-            new Object [] {objIds.get(0).intValue(), Pdef.getName(), Pdef.getDescription(), 
-                rawTypeCB.getItemAt(Pdef.getRawType()).toString(), Pdef.getRawUnit(), Pdef.getGenerationEnabled(), Pdef.getUpdateInterval().getValue()}
-            );
+          parameterTableData.insertRow(parameterDefinitionSelectedIndex,
+                                       new Object[]
+                                       {
+                                         objIds.get(0).intValue(), Pdef.getName(), Pdef.getDescription(),
+                                         rawTypeCB.getItemAt(Pdef.getRawType()).toString(), Pdef.getRawUnit(), Pdef.getGenerationEnabled(), Pdef.getUpdateInterval().getValue()
+                                       }
+          );
           LOGGER.info("updateDefinition executed");
         }
-    }
-    catch (MALException | MALInteractionException ex)
-    {
-      Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-    }
-        
-    this.save2File();
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
     }//GEN-LAST:event_submitButtonActionPerformed
 
     private void updateDefinitionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateDefinitionButtonActionPerformed
 
-    if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
+      if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
+      {
+        return;  // Well, then nothing to be done here folks!
+      }
+      titleEditParameter.setText("Update Parameter Definition");
+      parameterDefinitionSelectedIndex = parameterTable.getSelectedRow();
 
-        titleEditParameter.setText("Update Parameter Definition");
-        parameterDefinitionSelectedIndex = parameterTable.getSelectedRow();
+      nameTF.setText(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 1).toString());
+      descriptionTF.setText(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 2).toString());
+      rawTypeCB.setSelectedItem(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 3).toString());
 
-        nameTF.setText          (parameterTable.getValueAt(parameterDefinitionSelectedIndex, 1).toString());
-        descriptionTF.setText   (parameterTable.getValueAt(parameterDefinitionSelectedIndex, 2).toString());
-        rawTypeCB.setSelectedItem(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 3).toString());
-        
-        rawUnitTF.setText       (parameterTable.getValueAt(parameterDefinitionSelectedIndex, 4).toString());
-        updateIntervalTF.setText(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 6).toString());
-        
-        validityExpressionCB.setSelected(false);
-        validityExpressionCBActionPerformed(null);
+      rawUnitTF.setText(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 4).toString());
+      updateIntervalTF.setText(parameterTable.getValueAt(parameterDefinitionSelectedIndex, 6).toString());
 
-        String str = parameterTable.getValueAt(parameterTable.getSelectedRow(), 5).toString();
-        Boolean curState = (str.equals("true")); // String to Boolean conversion
+      validityExpressionCB.setSelected(false);
+      validityExpressionCBActionPerformed(null);
 
-        refreshParametersComboBox();
+      String str = parameterTable.getValueAt(parameterTable.getSelectedRow(), 5).toString();
+      Boolean curState = (str.equals("true")); // String to Boolean conversion
 
-        generationEnabledCB.setSelected(curState);
-        generationEnabledCB.setEnabled(true);
+      refreshParametersComboBox();
 
-        isAddDef = false;
-        editParameter.setVisible(true);
-        
+      generationEnabledCB.setSelected(curState);
+      generationEnabledCB.setEnabled(true);
+
+      isAddDef = false;
+      editParameter.setVisible(true);
+
     }//GEN-LAST:event_updateDefinitionButtonActionPerformed
 
     private void updateIntervalTFActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateIntervalTFActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_updateIntervalTFActionPerformed
 
     private void parameterTableComponentAdded(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_parameterTableComponentAdded
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_parameterTableComponentAdded
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-        this.jMenuItem1ActionPerformed(null);
+      this.jMenuItem1ActionPerformed(null);
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void enableAllDefinitionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableAllDefinitionActionPerformed
-        try
-        {
+      try
+      {
         LOGGER.info("enableGeneration(0) started");
-        
+
         String str;
-        if (parameterTable.getSelectedRow() == -1){  // Used to avoid problems if no row is selected
-            if (parameterTable.getRowCount() != 0){
-                str = parameterTable.getValueAt(0, 5).toString(); // Get the status from selection
-            }else{
-                str = "true";
-            }
-        }else{
-            str = parameterTable.getValueAt(parameterTable.getSelectedRow(), 5).toString(); // Get the status from selection
+        if (parameterTable.getSelectedRow() == -1)
+        {  // Used to avoid problems if no row is selected
+          if (parameterTable.getRowCount() != 0)
+          {
+            str = parameterTable.getValueAt(0, 5).toString(); // Get the status from selection
+          }
+          else
+          {
+            str = "true";
+          }
+        }
+        else
+        {
+          str = parameterTable.getValueAt(parameterTable.getSelectedRow(), 5).toString(); // Get the status from selection
         }
         Boolean curState = (str.equals("true")); // String to Boolean conversion
         InstanceBooleanPairList BoolPairList = new InstanceBooleanPairList();
-        BoolPairList.add(new InstanceBooleanPair( (long) 0, !curState) );  // Zero is the wildcard
-      
+        BoolPairList.add(new InstanceBooleanPair((long) 0, !curState));  // Zero is the wildcard
+
         parameterService.enableGeneration(false, BoolPairList);  // false: no group service
         LOGGER.info("enableGeneration(0) executed");
-        
+
         for (int i = 0; i < parameterTable.getRowCount(); i++)
-            parameterTable.setValueAt(!curState, i, 5);
-        
-        }
-        catch (MALException | MALInteractionException ex)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          parameterTable.setValueAt(!curState, i, 5);
         }
 
-        this.save2File();
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
 
     }//GEN-LAST:event_enableAllDefinitionActionPerformed
 
     private void removeDefinitionAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeDefinitionAllButtonActionPerformed
       try
-        {
+      {
         LOGGER.info("removeDefinition(0) started");
-        
+
         Long objId = new Long(0);
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         parameterService.removeDefinition(longlist);
         LOGGER.info("removeDefinition(0) executed");
-        
-        for (int i=0; i<longlist.size(); i++) // Set the slots to red
-            labels[longlist.get(i).intValue()].setRed();
+
+        for (int i = 0; i < longlist.size(); i++) // Set the slots to red
+        {
+          labels[longlist.get(i).intValue()].setRed();
+        }
 
         while (parameterTableData.getRowCount() != 0)
-            parameterTableData.removeRow(parameterTableData.getRowCount() - 1);
-        
-        }
-      
-        catch (MALException | MALInteractionException ex)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          parameterTableData.removeRow(parameterTableData.getRowCount() - 1);
         }
+
+      }
+
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
       this.save2File();
 
@@ -2368,206 +2475,224 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
 
     private void getValueAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getValueAllButtonActionPerformed
       try
-        {
+      {
         LOGGER.info("getValue(0) started");
-        
+
         Long objId = (long) 0;
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         org.ccsds.moims.mo.mc.parameter.body.GetValueResponse value = parameterService.getValue(longlist);
         LOGGER.info("getValue(0) executed");
-        
+
         String str = "";
-        for(int i=0; i<value.getBodyElement0().size(); i++){
-            str += "The value for objId " + value.getBodyElement0().get(i).toString() + " is:" + "\n" + value.getBodyElement1().get(i).toString() + "\n";
-        }
-            
-        JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
-        
-        }
-        catch (MALException | MALInteractionException ex)
+        for (int i = 0; i < value.getBodyElement0().size(); i++)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          str += "The value for objId " + value.getBodyElement0().get(i).toString() + " is:" + "\n" + value.getBodyElement1().get(i).toString() + "\n";
         }
+
+        JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
+
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
       this.save2File();
     }//GEN-LAST:event_getValueAllButtonActionPerformed
 
     private void getValueButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getValueButtonActionPerformed
       try
-        {
+      {
         if (parameterTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
-
+        {
+          return;  // Well, then nothing to be done here folks!
+        }
         LOGGER.info("getValue started");
-        
+
         Long objId = new Long(parameterTable.getValueAt(parameterTable.getSelectedRow(), 0).toString());
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         org.ccsds.moims.mo.mc.parameter.body.GetValueResponse value = parameterService.getValue(longlist);
         LOGGER.info("getValue executed");
-        
+
         String str = "";
-        for(int i=0; i<value.getBodyElement0().size(); i++){
-            str += "The value for objId " + value.getBodyElement0().get(i).toString() + " is:" + "\n" + value.getBodyElement1().get(i).toString() + "\n";
-        }
-            
-        JOptionPane.showMessageDialog(null, str, "Returned Values from the Provider", JOptionPane.PLAIN_MESSAGE);
-        }
-        catch (MALException | MALInteractionException ex)
+        for (int i = 0; i < value.getBodyElement0().size(); i++)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          str += "The value for objId " + value.getBodyElement0().get(i).toString() + " is:" + "\n" + value.getBodyElement1().get(i).toString() + "\n";
         }
 
-        this.save2File();
+        JOptionPane.showMessageDialog(null, str, "Returned Values from the Provider", JOptionPane.PLAIN_MESSAGE);
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
     }//GEN-LAST:event_getValueButtonActionPerformed
 
     private void aggregationTableComponentAdded(java.awt.event.ContainerEvent evt) {//GEN-FIRST:event_aggregationTableComponentAdded
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_aggregationTableComponentAdded
 
     private void getValueButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getValueButtonAggActionPerformed
-      try{
+      try
+      {
         if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
-
+        {
+          return;  // Well, then nothing to be done here folks!
+        }
         LOGGER.info("getValue started (Aggregation)");
-        
+
         Long objId = new Long(aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 0).toString());
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         org.ccsds.moims.mo.mc.aggregation.body.GetValueResponse value = aggregationService.getValue(longlist);
         LOGGER.info("getValue executed (Aggregation)");
-        
+
         String str = "";
-        for(int h=0; h<value.getBodyElement1().size(); h++){
-            str += "The value for objId " + value.getBodyElement0().get(h).toString() + " (AggregationValue index: " + h + ") is:" + "\n";
-            for(int i=0; i<value.getBodyElement1().get(h).getParameterSetValues().size(); i++){
-                for(int j=0; j<value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().size(); j++){
-                    if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j) == null)
-                        continue;
-                    str += "(parameterSetValue index: " + i + ") " + "validityState: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getInvalidSubState().toString() + "\n";
-                    if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue() != null)
-                        str += "(parameterSetValue index: " + i + ") " + "rawValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue().toString() + "\n";
-                    if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue() != null)
-                        str += "(parameterSetValue index: " + i + ") " + "convertedValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue().toString() + "\n";
-                    str += "\n";
-                }
-            }
-            str += "---------------------------------------\n";
-        }       
-        
-        JOptionPane.showMessageDialog(null, str, "Returned Values from the Provider", JOptionPane.PLAIN_MESSAGE);
-        }
-        catch (MALException | MALInteractionException ex)
+        for (int h = 0; h < value.getBodyElement1().size(); h++)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          str += "The value for objId " + value.getBodyElement0().get(h).toString() + " (AggregationValue index: " + h + ") is:" + "\n";
+          for (int i = 0; i < value.getBodyElement1().get(h).getParameterSetValues().size(); i++)
+          {
+            for (int j = 0; j < value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().size(); j++)
+            {
+              if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j) == null)
+              {
+                continue;
+              }
+              str += "(parameterSetValue index: " + i + ") " + "validityState: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getInvalidSubState().toString() + "\n";
+              if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue() != null)
+              {
+                str += "(parameterSetValue index: " + i + ") " + "rawValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue().toString() + "\n";
+              }
+              if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue() != null)
+              {
+                str += "(parameterSetValue index: " + i + ") " + "convertedValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue().toString() + "\n";
+              }
+              str += "\n";
+            }
+          }
+          str += "---------------------------------------\n";
         }
 
-        this.save2File();
+        JOptionPane.showMessageDialog(null, str, "Returned Values from the Provider", JOptionPane.PLAIN_MESSAGE);
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
     }//GEN-LAST:event_getValueButtonAggActionPerformed
 
     private void enableDefinitionButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableDefinitionButtonAggActionPerformed
-        if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
-
-        try
-        {
+      if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
+      {
+        return;  // Well, then nothing to be done here folks!
+      }
+      try
+      {
         LOGGER.info("enableGeneration started (Aggregation)");
-        
+
         Long objId = new Long(aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 0).toString());
         String str = aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 4).toString();
         Boolean curState = (str.equals("true")); // String to Boolean conversion
         InstanceBooleanPairList BoolPairList = new InstanceBooleanPairList();
-        BoolPairList.add(new InstanceBooleanPair( objId, !curState) ); 
-      
+        BoolPairList.add(new InstanceBooleanPair(objId, !curState));
+
         aggregationService.enableGeneration(false, BoolPairList);
         LOGGER.info("enableGeneration executed (Aggregation)");
-        
+
         aggregationTable.setValueAt(!curState, aggregationTable.getSelectedRow(), 4);
         this.save2File();
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
     }//GEN-LAST:event_enableDefinitionButtonAggActionPerformed
 
     private void addDefinitionButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addDefinitionButtonAggActionPerformed
-        titleEditParameter1.setText("Add a new Aggregation Definition");
-        nameTF1.setText("");
-        descriptionTF1.setText("");
-        categoryCB1.setSelectedIndex(0);  // Default dash
+      titleEditParameter1.setText("Add a new Aggregation Definition");
+      nameTF1.setText("");
+      descriptionTF1.setText("");
+      categoryCB1.setSelectedIndex(0);  // Default dash
 
-        updateIntervalTF1.setText("");
-        filteredTimeoutTF1.setText("");
-        generationEnabledCB1.setSelected(false);
-        generationEnabledCB1.setEnabled(false);
-        filterEnabledCB1.setSelected(false);
-        
-        thresholdTypeCB1.setSelectedIndex(0);
-        thresholdValueTB1.setText("");
-        
-        parameterSetsTableData = new DefaultTableModel();
-        parameterSetsTableData.setColumnIdentifiers(new Vector<String>(Arrays.asList(parameterSetsTableCol)));
-        parameterSetsTable.setModel(parameterSetsTableData);
+      updateIntervalTF1.setText("");
+      filteredTimeoutTF1.setText("");
+      generationEnabledCB1.setSelected(false);
+      generationEnabledCB1.setEnabled(false);
+      filterEnabledCB1.setSelected(false);
 
-        refreshParametersComboBox();
-        isAddDef = true;
-        editAggregation.setVisible(true);
-        
+      thresholdTypeCB1.setSelectedIndex(0);
+      thresholdValueTB1.setText("");
+
+      parameterSetsTableData = new DefaultTableModel();
+      parameterSetsTableData.setColumnIdentifiers(new Vector<String>(Arrays.asList(parameterSetsTableCol)));
+      parameterSetsTable.setModel(parameterSetsTableData);
+
+      refreshParametersComboBox();
+      isAddDef = true;
+      editAggregation.setVisible(true);
+
     }//GEN-LAST:event_addDefinitionButtonAggActionPerformed
 
     private void updateDefinitionButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateDefinitionButtonAggActionPerformed
-    if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
+      if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
+      {
+        return;  // Well, then nothing to be done here folks!
+      }
+      titleEditParameter1.setText("Update Aggregation Definition");
+      aggregationDefinitionSelectedIndex = aggregationTable.getSelectedRow();
 
-        titleEditParameter1.setText("Update Aggregation Definition");
-        aggregationDefinitionSelectedIndex = aggregationTable.getSelectedRow();
+      nameTF1.setText(aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 1).toString());
+      descriptionTF1.setText(aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 2).toString());
+      categoryCB1.setSelectedItem(aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 3).toString());
 
-        nameTF1.setText            (aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 1).toString());
-        descriptionTF1.setText     (aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 2).toString());
-        categoryCB1.setSelectedItem(aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 3).toString());
-        
-        updateIntervalTF1.setText  (aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 5).toString());
-        filteredTimeoutTF1.setText (aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 7).toString());
-        
-        filterEnabledCB1.setSelected(false);
-        validityExpressionCBActionPerformed(null);
+      updateIntervalTF1.setText(aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 5).toString());
+      filteredTimeoutTF1.setText(aggregationTable.getValueAt(aggregationDefinitionSelectedIndex, 7).toString());
 
-        Boolean curState = (aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 4).toString().equals("true")); // String to Boolean conversion
-        generationEnabledCB1.setSelected(curState);
-        generationEnabledCB1.setEnabled(true);
+      filterEnabledCB1.setSelected(false);
+      validityExpressionCBActionPerformed(null);
 
-        curState = (aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 6).toString().equals("true")); // String to Boolean conversion
-        filterEnabledCB1.setSelected(curState);
+      Boolean curState = (aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 4).toString().equals("true")); // String to Boolean conversion
+      generationEnabledCB1.setSelected(curState);
+      generationEnabledCB1.setEnabled(true);
 
-        parameterSetsTableData = new DefaultTableModel();
-        parameterSetsTableData.setDataVector(parameterSetsTableDataAll.get(aggregationDefinitionSelectedIndex).getDataVector(),
-                new Vector<String>(Arrays.asList(parameterSetsTableCol)));
-        parameterSetsTable.setModel(parameterSetsTableData);
-        
-        refreshParametersComboBox();
+      curState = (aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 6).toString().equals("true")); // String to Boolean conversion
+      filterEnabledCB1.setSelected(curState);
 
-        isAddDef = false;
-        editAggregation.setVisible(true);
+      parameterSetsTableData = new DefaultTableModel();
+      parameterSetsTableData.setDataVector(parameterSetsTableDataAll.get(aggregationDefinitionSelectedIndex).getDataVector(),
+                                           new Vector<String>(Arrays.asList(parameterSetsTableCol)));
+      parameterSetsTable.setModel(parameterSetsTableData);
+
+      refreshParametersComboBox();
+
+      isAddDef = false;
+      editAggregation.setVisible(true);
     }//GEN-LAST:event_updateDefinitionButtonAggActionPerformed
 
     private void removeDefinitionButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeDefinitionButtonAggActionPerformed
-        try{
+      try
+      {
         if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
-
+        {
+          return;  // Well, then nothing to be done here folks!
+        }
         LOGGER.info("removeDefinition started (Aggregation)");
-        
+
         Long objId = new Long(aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 0).toString());
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         aggregationService.removeDefinition(longlist);
         LOGGER.info("removeDefinition executed (Aggregation)");
 
@@ -2575,458 +2700,518 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
         aggregationTableData.removeRow(aggregationTable.getSelectedRow());
         this.save2File();
 
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
-        this.save2File();
+      this.save2File();
 
     }//GEN-LAST:event_removeDefinitionButtonAggActionPerformed
 
     private void getValueAllButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_getValueAllButtonAggActionPerformed
       try
-        {
+      {
         LOGGER.info("getValue(0) started (Aggregation)");
-        
+
         Long objId = (long) 0;
         LongList longlist = new LongList();
         longlist.add(objId);
-            
+
         org.ccsds.moims.mo.mc.aggregation.body.GetValueResponse value = aggregationService.getValue(longlist);
         LOGGER.info("getValue(0) executed (Aggregation)");
-        
+
         String str = "";
-        for(int h=0; h<value.getBodyElement1().size(); h++){
-            str += "The value for objId " + value.getBodyElement0().get(h).toString() + " (AggregationValue index: " + h + ") is:" + "\n";
-            for(int i=0; i<value.getBodyElement1().get(h).getParameterSetValues().size(); i++){
-                for(int j=0; j<value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().size(); j++){
-                    if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j) == null)
-                        continue;
-                    str += "(parameterSetValue index: " + i + ") " + "validityState: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getInvalidSubState().toString() + "\n";
-                    if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue() != null)
-                        str += "(parameterSetValue index: " + i + ") " + "rawValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue().toString() + "\n";
-                    if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue() != null)
-                        str += "(parameterSetValue index: " + i + ") " + "convertedValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue().toString() + "\n";
-                    str += "\n";
-                }
-            }
-            str += "---------------------------------------\n";
-        }
-            
-        JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
-        
-        }
-        catch (MALException | MALInteractionException ex)
+        for (int h = 0; h < value.getBodyElement1().size(); h++)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          str += "The value for objId " + value.getBodyElement0().get(h).toString() + " (AggregationValue index: " + h + ") is:" + "\n";
+          for (int i = 0; i < value.getBodyElement1().get(h).getParameterSetValues().size(); i++)
+          {
+            for (int j = 0; j < value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().size(); j++)
+            {
+              if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j) == null)
+              {
+                continue;
+              }
+              str += "(parameterSetValue index: " + i + ") " + "validityState: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getInvalidSubState().toString() + "\n";
+              if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue() != null)
+              {
+                str += "(parameterSetValue index: " + i + ") " + "rawValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getRawValue().toString() + "\n";
+              }
+              if (value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue() != null)
+              {
+                str += "(parameterSetValue index: " + i + ") " + "convertedValue: " + value.getBodyElement1().get(h).getParameterSetValues().get(i).getValues().get(j).getConvertedValue().toString() + "\n";
+              }
+              str += "\n";
+            }
+          }
+          str += "---------------------------------------\n";
         }
+
+        JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
+
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
       this.save2File();
     }//GEN-LAST:event_getValueAllButtonAggActionPerformed
 
     private void enableDefinitionAllAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableDefinitionAllAggActionPerformed
-        try
-        {
+      try
+      {
         LOGGER.info("enableGeneration(0) started (Aggregation)");
-        
+
         String str;
-        if (aggregationTable.getSelectedRow() == -1){  // Used to avoid problems if no row is selected
-            if (aggregationTable.getRowCount() != 0){
-                str = aggregationTable.getValueAt(0, 4).toString(); // Get the status from selection
-            }else{
-                str = "true";
-            }
-        }else{
-            str = aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 4).toString(); // Get the status from selection
+        if (aggregationTable.getSelectedRow() == -1)
+        {  // Used to avoid problems if no row is selected
+          if (aggregationTable.getRowCount() != 0)
+          {
+            str = aggregationTable.getValueAt(0, 4).toString(); // Get the status from selection
+          }
+          else
+          {
+            str = "true";
+          }
+        }
+        else
+        {
+          str = aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 4).toString(); // Get the status from selection
         }
         Boolean curState = (str.equals("true")); // String to Boolean conversion
         InstanceBooleanPairList BoolPairList = new InstanceBooleanPairList();
-        BoolPairList.add(new InstanceBooleanPair( (long) 0, !curState) );  // Zero is the wildcard
-      
+        BoolPairList.add(new InstanceBooleanPair((long) 0, !curState));  // Zero is the wildcard
+
         aggregationService.enableGeneration(false, BoolPairList);  // false: no group service
         LOGGER.info("enableGeneration(0) executed (Aggregation)");
-        
+
         for (int i = 0; i < aggregationTable.getRowCount(); i++)
-            aggregationTable.setValueAt(!curState, i, 4);
-        
-        }
-        catch (MALException | MALInteractionException ex)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          aggregationTable.setValueAt(!curState, i, 4);
         }
 
-        this.save2File();
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
 
     }//GEN-LAST:event_enableDefinitionAllAggActionPerformed
 
     private void listDefinitionAllButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_listDefinitionAllButtonAggActionPerformed
-      try {
-      LOGGER.info("listDefinition(\"*\") started (Aggregation)");
-      IdentifierList IdList = new IdentifierList();
-      IdList.add(new Identifier ("*"));
+      try
+      {
+        LOGGER.info("listDefinition(\"*\") started (Aggregation)");
+        IdentifierList IdList = new IdentifierList();
+        IdList.add(new Identifier("*"));
 
-      LongList output =  aggregationService.listDefinition(IdList);
+        LongList output = aggregationService.listDefinition(IdList);
 
-      String str = "Object instance identifiers on the provider: \n";
-          for (Long output1 : output) {
-              str += output1.toString() + "\n";
-          }
+        String str = "Object instance identifiers on the provider: \n";
+        for (Long output1 : output)
+        {
+          str += output1.toString() + "\n";
+        }
 
-      JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
-      LOGGER.log(Level.INFO, "listDefinition(\"*\") returned {0} object instance identifiers (Aggregation)", output.size());
-          
-      } catch (MALInteractionException | MALException ex) {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+        JOptionPane.showMessageDialog(null, str, "Returned List from the Provider", JOptionPane.PLAIN_MESSAGE);
+        LOGGER.log(Level.INFO, "listDefinition(\"*\") returned {0} object instance identifiers (Aggregation)", output.size());
+
+      }
+      catch (MALInteractionException | MALException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
       }
 
     }//GEN-LAST:event_listDefinitionAllButtonAggActionPerformed
 
     private void removeDefinitionAllButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeDefinitionAllButtonAggActionPerformed
       try
-        {
+      {
         LOGGER.info("removeDefinition(0) started (Aggregation)");
-        
+
         Long objId = new Long(0);
         LongList longlist = new LongList();
         longlist.add(objId);
-      
+
         aggregationService.removeDefinition(longlist);
         LOGGER.info("removeDefinition(0) executed (Aggregation)");
-        
-        while (aggregationTableData.getRowCount() != 0){
-            parameterSetsTableDataAll.remove(aggregationTableData.getRowCount() - 1);
-            aggregationTableData.removeRow(aggregationTableData.getRowCount() - 1);
+
+        while (aggregationTableData.getRowCount() != 0)
+        {
+          parameterSetsTableDataAll.remove(aggregationTableData.getRowCount() - 1);
+          aggregationTableData.removeRow(aggregationTableData.getRowCount() - 1);
         }
 
-        }     
-        catch (MALException | MALInteractionException ex)
-        {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
       this.save2File();
     }//GEN-LAST:event_removeDefinitionAllButtonAggActionPerformed
 
     private void enableFilterButtonAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableFilterButtonAggActionPerformed
-        if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
-            return;  // Well, then nothing to be done here folks!
-
-        try{
+      if (aggregationTable.getSelectedRow() == -1)  // The row is not selected?
+      {
+        return;  // Well, then nothing to be done here folks!
+      }
+      try
+      {
         LOGGER.info("enableFilter started (Aggregation)");
-        
+
         Long objId = new Long(aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 0).toString());
         String str = aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 6).toString();
         Boolean curState = (str.equals("true")); // String to Boolean conversion
         InstanceBooleanPairList BoolPairList = new InstanceBooleanPairList();
-        BoolPairList.add(new InstanceBooleanPair( objId, !curState) ); 
-      
+        BoolPairList.add(new InstanceBooleanPair(objId, !curState));
+
         aggregationService.enableFilter(false, BoolPairList);
         LOGGER.info("enableFilter executed (Aggregation)");
-        
+
         aggregationTable.setValueAt(!curState, aggregationTable.getSelectedRow(), 6);
         this.save2File();
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_enableFilterButtonAggActionPerformed
 
     private void enableFilterAllAggActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_enableFilterAllAggActionPerformed
-        try
-        {
+      try
+      {
         LOGGER.info("enableFilter(0) started (Aggregation)");
-        
+
         String str;
-        if (aggregationTable.getSelectedRow() == -1){  // Used to avoid problems if no row is selected
-            if (aggregationTable.getRowCount() != 0){
-                str = aggregationTable.getValueAt(0, 4).toString(); // Get the status from selection
-            }else{
-                str = "true";
-            }
-        }else{
-            str = aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 6).toString(); // Get the status from selection
+        if (aggregationTable.getSelectedRow() == -1)
+        {  // Used to avoid problems if no row is selected
+          if (aggregationTable.getRowCount() != 0)
+          {
+            str = aggregationTable.getValueAt(0, 4).toString(); // Get the status from selection
+          }
+          else
+          {
+            str = "true";
+          }
+        }
+        else
+        {
+          str = aggregationTable.getValueAt(aggregationTable.getSelectedRow(), 6).toString(); // Get the status from selection
         }
         Boolean curState = (str.equals("true")); // String to Boolean conversion
         InstanceBooleanPairList BoolPairList = new InstanceBooleanPairList();
-        BoolPairList.add(new InstanceBooleanPair( (long) 0, !curState) );  // Zero is the wildcard
-      
+        BoolPairList.add(new InstanceBooleanPair((long) 0, !curState));  // Zero is the wildcard
+
         aggregationService.enableFilter(false, BoolPairList);  // false: no group service
         LOGGER.info("enableFilter(0) executed (Aggregation)");
-        
+
         for (int i = 0; i < aggregationTable.getRowCount(); i++)
-            aggregationTable.setValueAt(!curState, i, 6);
-        
-        }
-        catch (MALException | MALInteractionException ex)
         {
-          Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+          aggregationTable.setValueAt(!curState, i, 6);
         }
 
-        this.save2File();
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
     }//GEN-LAST:event_enableFilterAllAggActionPerformed
 
     private void conversionCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_conversionCBActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_conversionCBActionPerformed
 
     private void validity3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validity3ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_validity3ActionPerformed
 
     private void validity4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validity4ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_validity4ActionPerformed
 
     private void validity2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validity2ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_validity2ActionPerformed
 
     private void validityExpressionCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validityExpressionCBActionPerformed
 
-        validity1.setEnabled(validityExpressionCB.isSelected());
-        validity2.setEnabled(validityExpressionCB.isSelected());
-        validity3.setEnabled(validityExpressionCB.isSelected());
-        validity4.setEnabled(validityExpressionCB.isSelected());
+      validity1.setEnabled(validityExpressionCB.isSelected());
+      validity2.setEnabled(validityExpressionCB.isSelected());
+      validity3.setEnabled(validityExpressionCB.isSelected());
+      validity4.setEnabled(validityExpressionCB.isSelected());
 
     }//GEN-LAST:event_validityExpressionCBActionPerformed
 
     private void validity1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validity1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_validity1ActionPerformed
 
     private void uri1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uri1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_uri1ActionPerformed
 
     private void uri2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uri2ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_uri2ActionPerformed
 
     private void uri3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uri3ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_uri3ActionPerformed
 
     private void uri4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_uri4ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_uri4ActionPerformed
 
     private void updateIntervalTF1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateIntervalTF1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_updateIntervalTF1ActionPerformed
 
     private void generationEnabledCB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generationEnabledCB1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_generationEnabledCB1ActionPerformed
 
     private void parameterCB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_parameterCB1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_parameterCB1ActionPerformed
 
     private void sampleIntervalTB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sampleIntervalTB1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_sampleIntervalTB1ActionPerformed
 
     private void submitButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_submitButton1ActionPerformed
 
-        if (nameTF1.getText().equals("") ||
-            descriptionTF1.getText().equals("") ||
-            categoryCB1.getSelectedIndex() == 0 ||
-            updateIntervalTF1.getText().equals("")     ||
-            filteredTimeoutTF1.getText().equals("")  ){
-                JOptionPane.showMessageDialog(null, "Please fill-in all the necessary fields!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-                return;
-        }
-        Float updateInterval;
-        Float filteredTimeout;
-        try{   updateInterval = Float.parseFloat(updateIntervalTF1.getText());  // Check if it is a number
-               filteredTimeout = Float.parseFloat(filteredTimeoutTF1.getText());  // Check if it is a number
-        }catch(NumberFormatException nfe)   {  
-            JOptionPane.showMessageDialog(null, "updateInterval or filteredTimeout is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-            return;  
-        }  
+      if (nameTF1.getText().equals("")
+              || descriptionTF1.getText().equals("")
+              || categoryCB1.getSelectedIndex() == 0
+              || updateIntervalTF1.getText().equals("")
+              || filteredTimeoutTF1.getText().equals(""))
+      {
+        JOptionPane.showMessageDialog(null, "Please fill-in all the necessary fields!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+        return;
+      }
+      Float updateInterval;
+      Float filteredTimeout;
+      try
+      {
+        updateInterval = Float.parseFloat(updateIntervalTF1.getText());  // Check if it is a number
+        filteredTimeout = Float.parseFloat(filteredTimeoutTF1.getText());  // Check if it is a number
+      }
+      catch (NumberFormatException nfe)
+      {
+        JOptionPane.showMessageDialog(null, "updateInterval or filteredTimeout is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+        return;
+      }
 
-        AggregationDefinitionDetails aDef;
-        aDef = makeNewAggregationDefinition(nameTF1.getText(),
-                descriptionTF1.getText(), 
-                AggregationCategory.fromOrdinal(categoryCB1.getSelectedIndex()), 
-                generationEnabledCB1.isSelected(), 
-                updateInterval, 
-                filterEnabledCB1.isSelected(), 
-                filteredTimeout,
-                makeNewAggregationParameterSetList() );
-        
-        AggregationDefinitionDetailsList aDefs = new AggregationDefinitionDetailsList();
-        aDefs.add(aDef);
-        editAggregation.setVisible(false);
-             
-    try
-    {
-        if (isAddDef){  // Are we adding a new definition?
+      AggregationDefinitionDetails aDef;
+      aDef = makeNewAggregationDefinition(nameTF1.getText(),
+                                          descriptionTF1.getText(),
+                                          AggregationCategory.fromOrdinal(categoryCB1.getSelectedIndex()),
+                                          generationEnabledCB1.isSelected(),
+                                          updateInterval,
+                                          filterEnabledCB1.isSelected(),
+                                          filteredTimeout,
+                                          makeNewAggregationParameterSetList());
+
+      AggregationDefinitionDetailsList aDefs = new AggregationDefinitionDetailsList();
+      aDefs.add(aDef);
+      editAggregation.setVisible(false);
+
+      try
+      {
+        if (isAddDef)
+        {  // Are we adding a new definition?
           LOGGER.info("addDefinition started (Aggregation)");
           LongList output = aggregationService.addDefinition(aDefs);
           LOGGER.log(Level.INFO, "addDefinition returned {0} object instance identifiers (Aggregation)", output.size());
           aggregationTableData.addRow(
-            new Object [] {output.get(0).intValue(), aDef.getName(), aDef.getDescription(), 
-                categoryCB1.getItemAt(aDef.getCategory().getOrdinal()).toString(), aDef.getGenerationEnabled(),
-                aDef.getUpdateInterval().getValue(), aDef.getFilterEnabled(), aDef.getFilteredTimeout().getValue() }
-            );
+                  new Object[]
+                  {
+                    output.get(0).intValue(), aDef.getName(), aDef.getDescription(),
+                    categoryCB1.getItemAt(aDef.getCategory().getOrdinal()).toString(), aDef.getGenerationEnabled(),
+                    aDef.getUpdateInterval().getValue(), aDef.getFilterEnabled(), aDef.getFilteredTimeout().getValue()
+                  }
+          );
           DefaultTableModel tmp = new DefaultTableModel();
           tmp.setDataVector(parameterSetsTableData.getDataVector(), new Vector<String>(Arrays.asList(parameterSetsTableCol)));
           parameterSetsTableDataAll.add(tmp);
 
-        }else{  // Well, then we are updating a previous selected definition
+        }
+        else
+        {  // Well, then we are updating a previous selected definition
           LOGGER.info("updateDefinition started (Aggregation)");
           LongList objIds = new LongList();
           objIds.add(new Long(aggregationTableData.getValueAt(aggregationDefinitionSelectedIndex, 0).toString()));
           aggregationService.updateDefinition(objIds, aDefs);  // Execute the update
           aggregationTableData.removeRow(aggregationDefinitionSelectedIndex);
-          aggregationTableData.insertRow(aggregationDefinitionSelectedIndex, 
-            new Object [] {objIds.get(0).intValue(), aDef.getName(), aDef.getDescription(),
-                categoryCB1.getItemAt(aDef.getCategory().getOrdinal()).toString(),  aDef.getGenerationEnabled(),
-                aDef.getUpdateInterval().getValue(), aDef.getFilterEnabled(), aDef.getFilteredTimeout().getValue() }
-            );
+          aggregationTableData.insertRow(aggregationDefinitionSelectedIndex,
+                                         new Object[]
+                                         {
+                                           objIds.get(0).intValue(), aDef.getName(), aDef.getDescription(),
+                                           categoryCB1.getItemAt(aDef.getCategory().getOrdinal()).toString(), aDef.getGenerationEnabled(),
+                                           aDef.getUpdateInterval().getValue(), aDef.getFilterEnabled(), aDef.getFilteredTimeout().getValue()
+                                         }
+          );
           DefaultTableModel tmp = new DefaultTableModel();
           tmp.setDataVector(parameterSetsTableData.getDataVector(), new Vector<String>(Arrays.asList(parameterSetsTableCol)));
           parameterSetsTableDataAll.set(aggregationDefinitionSelectedIndex, tmp);
           LOGGER.info("updateDefinition executed (Aggregation)");
         }
-    }
-    catch (MALException | MALInteractionException ex)
-    {
-      Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-    }
-        
-    this.save2File();
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      this.save2File();
 
 
     }//GEN-LAST:event_submitButton1ActionPerformed
 
     private void filterEnabledCB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_filterEnabledCB1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_filterEnabledCB1ActionPerformed
 
     private void thresholdValueTB1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_thresholdValueTB1ActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_thresholdValueTB1ActionPerformed
 
     private void aggregateParameterButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aggregateParameterButtonActionPerformed
-        
-        if (sampleIntervalTB1.getText().equals("") ||
-            parameterCB1.getSelectedIndex() == -1   ){
-                JOptionPane.showMessageDialog(null, "Please fill-in all the necessary fields!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-                return;
-        }
-        
-        try{    Double.parseDouble(sampleIntervalTB1.getText());  // Check if it is a number
-        }catch(NumberFormatException nfe)   {  
-            JOptionPane.showMessageDialog(null, "sampleInterval is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-            return;  
-        }  
-        
-        Double thresholdValue = null; 
-        
-        if ( thresholdTypeCB1.getSelectedIndex() != 0 ){
-            if  ( thresholdValueTB1.getText().equals("") ){
-                JOptionPane.showMessageDialog(null, "Please enter a thresholdValue!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-                return;  
-            }
 
-            try{   thresholdValue = Double.parseDouble(thresholdValueTB1.getText());  // Check if it is a number
-            }catch(NumberFormatException nfe)   {  
-                JOptionPane.showMessageDialog(null, "thresholdValue is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
-                return;  
-            }  
+      if (sampleIntervalTB1.getText().equals("")
+              || parameterCB1.getSelectedIndex() == -1)
+      {
+        JOptionPane.showMessageDialog(null, "Please fill-in all the necessary fields!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+        return;
+      }
+
+      try
+      {
+        Double.parseDouble(sampleIntervalTB1.getText());  // Check if it is a number
+      }
+      catch (NumberFormatException nfe)
+      {
+        JOptionPane.showMessageDialog(null, "sampleInterval is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+        return;
+      }
+
+      Double thresholdValue = null;
+
+      if (thresholdTypeCB1.getSelectedIndex() != 0)
+      {
+        if (thresholdValueTB1.getText().equals(""))
+        {
+          JOptionPane.showMessageDialog(null, "Please enter a thresholdValue!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+          return;
         }
 
-        parameterSetsTableData.addRow(
-            new Object [] { parameterCB1.getSelectedItem().toString() , Double.parseDouble(sampleIntervalTB1.getText()), 
-                thresholdTypeCB1.getSelectedItem().toString() , thresholdValue  }
-            );
+        try
+        {
+          thresholdValue = Double.parseDouble(thresholdValueTB1.getText());  // Check if it is a number
+        }
+        catch (NumberFormatException nfe)
+        {
+          JOptionPane.showMessageDialog(null, "thresholdValue is not a number!", "Warning!", JOptionPane.PLAIN_MESSAGE);
+          return;
+        }
+      }
+
+      parameterSetsTableData.addRow(
+              new Object[]
+              {
+                parameterCB1.getSelectedItem().toString(), Double.parseDouble(sampleIntervalTB1.getText()),
+                thresholdTypeCB1.getSelectedItem().toString(), thresholdValue
+              }
+      );
 
     }//GEN-LAST:event_aggregateParameterButtonActionPerformed
 
     private void removeParameterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_removeParameterActionPerformed
-        if (parameterSetsTable.getSelectedRow() != -1)  // Did we select a parameter?
-            parameterSetsTableData.removeRow(parameterSetsTable.getSelectedRow());
+      if (parameterSetsTable.getSelectedRow() != -1)  // Did we select a parameter?
+      {
+        parameterSetsTableData.removeRow(parameterSetsTable.getSelectedRow());
+      }
     }//GEN-LAST:event_removeParameterActionPerformed
 
     private void msgBoxOnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_msgBoxOnActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
     }//GEN-LAST:event_msgBoxOnActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
-        try
-        {
-            deregMenuItemActionPerformed(null);
-            this.delayManager.resetDelay();
-            labels[0].reset();
-            StructureHelper.clearLoadedPropertiesList();
-            startService();
-            registerSubscription();
-        }
-        catch (MALException | MalformedURLException ex)
-        {
-            Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      try
+      {
+        deregMenuItemActionPerformed(null);
+        StructureHelper.clearLoadedPropertiesList();
+        startService();
+        registerSubscription();
+      }
+      catch (MALException | MalformedURLException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
     private void deregMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deregMenuItemActionPerformed
-        try
-        {
-            final Identifier subscriptionId = new Identifier("SUB");
-            final IdentifierList subLst = new IdentifierList();
-            subLst.add(subscriptionId);
-            //        if (parameterService.getConsumer().getTransmitErrorListener() != null)
-            parameterService.monitorValueDeregister(subLst);
-            //        if (aggregationService.getConsumer().getTransmitErrorListener() != null)
-            aggregationService.monitorValueDeregister(subLst);
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-            Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      try
+      {
+        final Identifier subscriptionId = new Identifier("SUB");
+        final IdentifierList subLst = new IdentifierList();
+        subLst.add(subscriptionId);
+        //        if (parameterService.getConsumer().getTransmitErrorListener() != null)
+        parameterService.monitorValueDeregister(subLst);
+        //        if (aggregationService.getConsumer().getTransmitErrorListener() != null)
+        aggregationService.monitorValueDeregister(subLst);
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_deregMenuItemActionPerformed
 
     private void regAllRadioButtonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regAllRadioButtonMenuItemActionPerformed
-        try
-        {
-            parameterService.monitorValueRegister(subRequestAll, adapterParameter);
-            aggregationService.monitorValueRegister(subRequestAll, adapterAggregation);
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-            JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
-            Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      try
+      {
+        parameterService.monitorValueRegister(subRequestAll, adapterParameter);
+        aggregationService.monitorValueRegister(subRequestAll, adapterAggregation);
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_regAllRadioButtonMenuItemActionPerformed
 
     private void regHalfRadioButtonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regHalfRadioButtonMenuItemActionPerformed
-        try
-        {
-            parameterService.monitorValueRegister(subRequestHalf, adapterParameter);
-            aggregationService.monitorValueRegister(subRequestHalf, adapterAggregation);
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-            JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
-            Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      try
+      {
+        parameterService.monitorValueRegister(subRequestHalf, adapterParameter);
+        aggregationService.monitorValueRegister(subRequestHalf, adapterAggregation);
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_regHalfRadioButtonMenuItemActionPerformed
 
     private void regWildcardRadioButtonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regWildcardRadioButtonMenuItemActionPerformed
-        try
-        {
-            parameterService.monitorValueRegister(subRequestWildcard, adapterParameter);
-            aggregationService.monitorValueRegister(subRequestWildcard, adapterAggregation);
-        }
-        catch (MALException | MALInteractionException ex)
-        {
-            JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
-            Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-        }
+      try
+      {
+        parameterService.monitorValueRegister(subRequestWildcard, adapterParameter);
+        aggregationService.monitorValueRegister(subRequestWildcard, adapterAggregation);
+      }
+      catch (MALException | MALInteractionException ex)
+      {
+        JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
+        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
+      }
     }//GEN-LAST:event_regWildcardRadioButtonMenuItemActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -3039,7 +3224,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private javax.swing.JComboBox categoryCB1;
   private javax.swing.JButton connectButton;
   private javax.swing.JCheckBox conversionCB;
-  private javax.swing.JLabel delayLabel;
   private javax.swing.JMenuItem deregMenuItem;
   private javax.swing.JTextField descriptionTF;
   private javax.swing.JTextField descriptionTF1;
@@ -3062,7 +3246,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private javax.swing.JButton getValueButtonAgg;
   private javax.swing.JPanel homeTab;
   private javax.swing.JButton jButton1;
-  private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel10;
   private javax.swing.JLabel jLabel11;
   private javax.swing.JLabel jLabel12;
@@ -3125,7 +3308,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private javax.swing.JSeparator jSeparator9;
   private javax.swing.JTextArea jTextArea1;
   private javax.swing.JTextArea jTextArea2;
-  private javax.swing.JToolBar jToolBar1;
   private javax.swing.JButton listDefinitionAllButton;
   private javax.swing.JButton listDefinitionAllButtonAgg;
   private javax.swing.JCheckBox msgBoxOn;

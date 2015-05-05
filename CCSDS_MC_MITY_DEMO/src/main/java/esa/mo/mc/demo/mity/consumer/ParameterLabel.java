@@ -24,9 +24,7 @@ import java.awt.Color;
 import java.io.Serializable;
 
 /**
- * Class that extends the basic Swing label class to add in automatic handling for displaying an update and also
- * calculating the transmission delay for the specific update. It also interacts with the DelayManager to calculate the
- * total delay.
+ * Class that extends the basic Swing label class to add in automatic handling for displaying an update.
  */
 class ParameterLabel extends javax.swing.JLabel implements Serializable
 {
@@ -34,46 +32,36 @@ class ParameterLabel extends javax.swing.JLabel implements Serializable
   {
     Color.GREEN, Color.BLACK, Color.BLACK, Color.GREEN
   };
-  private final ParameterValue value;
+  private String value = "";
   private short oldval;
 
-  public ParameterLabel(final int index, final DelayManager delayManager)
+  public ParameterLabel(final int index)
   {
     super();
-    value = new ParameterValue(index, delayManager);
     oldval = 1;
   }
 
   public void setNewValue(final String newVal, final long iDiff)
   {
-    value.setNewValue(newVal, iDiff);
+    value = newVal;
     displayValue();
   }
 
   public void displayValue()
   {
-    String newVal = value.getLabelValue();
-    
     // display the new value
-    if ( newVal.equals("") ){
-        setText("");
-    }else{
-        setText(String.valueOf(newVal));
-   }
+    setText(value);
 
     // if we are in error we highlight the label in a different colour
     final int ii = Math.abs(oldval % 2);
-    if ( !newVal.equals("") )
-        oldval++;
-    if (value.isInError())
+    if (!value.equals(""))
     {
-      setBackground(Color.RED);
+      oldval++;
+      setBackground(colours[2 + ii]);
     }
     else
     {
-      setBackground(colours[2 + ii]);
-      if ( newVal.equals("") )
-          setBackground(Color.WHITE);
+      setBackground(Color.WHITE);
     }
 
     setForeground(colours[ii]);
@@ -81,13 +69,7 @@ class ParameterLabel extends javax.swing.JLabel implements Serializable
 
   public void setRed()
   {
-      setBackground(Color.RED);
-      setForeground(Color.BLACK);
-  }
-
-  public void reset()
-  {
-    value.reset();
-    displayValue();
+    setBackground(Color.RED);
+    setForeground(Color.BLACK);
   }
 }

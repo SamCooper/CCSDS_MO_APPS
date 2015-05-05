@@ -71,7 +71,7 @@
   </developers>
 
   <properties>
-    <assembly.mainClass>esa.mo.mal.demo.provider.MityDemoProviderGui</assembly.mainClass>
+    <assembly.mainClass>esa.mo.mc.demo.mity.provider.MityDemoProviderGui</assembly.mainClass>
   </properties>
 
   <dependencies>
@@ -149,6 +149,9 @@
         <includes>
           <include>LICENCE.md</include>
         </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
       </resource>
     </resources>
     
