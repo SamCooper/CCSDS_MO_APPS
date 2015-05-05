@@ -26,7 +26,7 @@ import java.time.ZoneOffset;
  * Implements the monitoring parameters interface for the supply of parameter values.
  *
  */
-public class MonitoringParameters implements esa.mo.mal.demo.provider.MonitoringParameters
+public class MonitoringParameters implements esa.mo.mc.demo.mity.provider.MonitoringParameters
 {
   private final InstrumentsSimulator instrumentSimulator;
 

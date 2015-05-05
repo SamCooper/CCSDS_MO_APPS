@@ -18,7 +18,7 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.mal.demo.provider;
+package esa.mo.mc.demo.mity.provider;
 
 /**
  *

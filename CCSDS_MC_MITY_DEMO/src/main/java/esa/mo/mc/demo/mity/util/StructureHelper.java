@@ -18,14 +18,13 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.mal.demo.util;
+package esa.mo.mc.demo.mity.util;
 
 import org.ccsds.moims.mo.com.archive.structures.ExpressionOperator;
 import org.ccsds.moims.mo.mal.structures.Attribute;
 
 /**
- * Helper class that contains useful utility functions. It also stores a list of loaded property files so that the same property
- * file is not loaded multiple times.
+ * Helper class that contains useful utility functions.
  *
  */
 public abstract class StructureHelper extends esa.mo.mal.support.StructureHelper
@@ -80,5 +79,4 @@ public abstract class StructureHelper extends esa.mo.mal.support.StructureHelper
 
     return null; // The expression was not evaluated
   }
-
 }

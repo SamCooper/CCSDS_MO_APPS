@@ -18,7 +18,7 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.mal.demo.consumer;
+package esa.mo.mc.demo.mity.consumer;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;

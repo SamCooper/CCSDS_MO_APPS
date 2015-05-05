@@ -4,4 +4,4 @@ provider on a simple grid and allows the registration for updates using either a
 parameters. It also has menu items for the invocation of some simple operations supported by the provider to test basic
 interaction pattern handling of the transport which is useful for testing a new transport or encoding.
 */
-package esa.mo.mal.demo.consumer;
+package esa.mo.mc.demo.mity.consumer;

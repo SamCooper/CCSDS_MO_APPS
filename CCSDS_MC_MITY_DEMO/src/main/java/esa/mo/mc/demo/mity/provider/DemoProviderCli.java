@@ -18,15 +18,15 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package esa.mo.mal.demo.provider;
+package esa.mo.mc.demo.mity.provider;
 
-import esa.mo.mal.demo.util.StructureHelper;
+import esa.mo.mc.demo.mity.util.StructureHelper;
 import java.io.File;
 import java.util.logging.Logger;
 
 /**
- * This class provides a simple cli for the control of the provider. It allows control of the generation of updates, the
- * rate the updates are generated, the size of the set of updates (the pool) and the block size of the update sets.
+ * This class provides a simple cli for the control of the provider. It allows control of the generation of updates, the rate the
+ * updates are generated, the size of the set of updates (the pool) and the block size of the update sets.
  */
 public class DemoProviderCli
 {
@@ -50,15 +50,18 @@ public class DemoProviderCli
 
     File file = new File(System.getProperty("provider.properties", "demoProvider.properties"));
     if (file.exists())
+    {
       sysProps.putAll(StructureHelper.loadProperties(file.toURI().toURL(), "provider.properties"));
+    }
 
     file = new File(System.getProperty("broker.properties", "sharedBrokerURI.properties"));
     if (file.exists())
+    {
       sysProps.putAll(StructureHelper.loadProperties(file.toURI().toURL(), "broker.properties"));
-    
+    }
+
     System.setProperties(sysProps);
     parameterService.init(parameterManager);
     aggregationService.init(parameterManager);
-
   }
 }
