@@ -111,8 +111,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private final int map_width = 750; // number of pixels on the width of the map
 
   private final Subscription subRequestWildcard;
-  private final Subscription subRequestHalf;
-  private final Subscription subRequestAll;
 
   private WorldMap map;  // Map coordinates sync
   private double mapLatitude = 0;
@@ -339,50 +337,15 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
 
     final Identifier subscriptionId = new Identifier("SUB");
     // set up the wildcard subscription
-    {
-      final EntityKey entitykey = new EntityKey(new Identifier("*"), 0L, 0L, 0L);
-      final EntityKeyList entityKeys = new EntityKeyList();
-      entityKeys.add(entitykey);
+    final EntityKey entitykey = new EntityKey(new Identifier("*"), 0L, 0L, 0L);
+    final EntityKeyList entityKeys = new EntityKeyList();
+    entityKeys.add(entitykey);
 
-      final EntityRequest entity = new EntityRequest(null, false, false, false, false, entityKeys);
-      final EntityRequestList entities = new EntityRequestList();
-      entities.add(entity);
+    final EntityRequest entity = new EntityRequest(null, false, false, false, false, entityKeys);
+    final EntityRequestList entities = new EntityRequestList();
+    entities.add(entity);
 
-      subRequestWildcard = new Subscription(subscriptionId, entities);
-    }
-    // set up the named first half subscription
-    {
-      final EntityKeyList entityKeys = new EntityKeyList();
-
-      for (int i = 0; i < (labels.length / 2); i++)
-      {
-        final EntityKey entitykey = new EntityKey(new Identifier(String.valueOf(i)), 0L, 0L, 0L);
-        entityKeys.add(entitykey);
-      }
-
-      final EntityRequest entity = new EntityRequest(null, false, false, false, false, entityKeys);
-      final EntityRequestList entities = new EntityRequestList();
-      entities.add(entity);
-
-      subRequestHalf = new Subscription(subscriptionId, entities);
-    }
-    // set up the named all subscription
-    {
-      final EntityKeyList entityKeys = new EntityKeyList();
-
-      for (int i = 0; i < labels.length; i++)
-      {
-        final EntityKey entitykey = new EntityKey(new Identifier(String.valueOf(i)), 0L, 0L, 0L);
-        entityKeys.add(entitykey);
-      }
-
-      final EntityRequest entity = new EntityRequest(null, false, false, false, false, entityKeys);
-
-      final EntityRequestList entities = new EntityRequestList();
-      entities.add(entity);
-
-      subRequestAll = new Subscription(subscriptionId, entities);
-    }
+    subRequestWildcard = new Subscription(subscriptionId, entities);
   }
 
   public AggregationDefinitionDetails makeNewAggregationDefinition(String name, String description, AggregationCategory category, boolean generationEnabled,
@@ -571,24 +534,7 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
 
   private void registerSubscription()
   {
-    if (this.regWildcardRadioButtonMenuItem.isSelected())
-    {
-      this.regWildcardRadioButtonMenuItemActionPerformed(null);
-    }
-    else
-    {
-      if (this.regHalfRadioButtonMenuItem.isSelected())
-      {
-        this.regHalfRadioButtonMenuItemActionPerformed(null);
-      }
-      else
-      {
-        if (this.regAllRadioButtonMenuItem.isSelected())
-        {
-          this.regAllRadioButtonMenuItemActionPerformed(null);
-        }
-      }
-    }
+    this.regAllRadioButtonMenuItemActionPerformed(null);
   }
 
   private void loadURIs() throws MalformedURLException
@@ -913,10 +859,7 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     jMenu1 = new javax.swing.JMenu();
     quitMenuItem = new javax.swing.JMenuItem();
     jMenu2 = new javax.swing.JMenu();
-    jMenu3 = new javax.swing.JMenu();
-    regWildcardRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
-    regHalfRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
-    regAllRadioButtonMenuItem = new javax.swing.JRadioButtonMenuItem();
+    jMenuItem2 = new javax.swing.JMenuItem();
     deregMenuItem = new javax.swing.JMenuItem();
     jSeparator1 = new javax.swing.JSeparator();
     jMenuItem1 = new javax.swing.JMenuItem();
@@ -2013,47 +1956,16 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     jMenu2.setText("Consumer");
     jMenu2.setName("jMenu2"); // NOI18N
 
-    jMenu3.setText("Register");
-    jMenu3.setName("jMenu3"); // NOI18N
-
-    subscriptionButtonGroup.add(regWildcardRadioButtonMenuItem);
-    regWildcardRadioButtonMenuItem.setSelected(true);
-    regWildcardRadioButtonMenuItem.setText("Wildcard");
-    regWildcardRadioButtonMenuItem.setName("regWildcardRadioButtonMenuItem"); // NOI18N
-    regWildcardRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        regWildcardRadioButtonMenuItemActionPerformed(evt);
-      }
-    });
-    jMenu3.add(regWildcardRadioButtonMenuItem);
-
-    subscriptionButtonGroup.add(regHalfRadioButtonMenuItem);
-    regHalfRadioButtonMenuItem.setText("Half");
-    regHalfRadioButtonMenuItem.setName("regHalfRadioButtonMenuItem"); // NOI18N
-    regHalfRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
-        regHalfRadioButtonMenuItemActionPerformed(evt);
-      }
-    });
-    jMenu3.add(regHalfRadioButtonMenuItem);
-
-    subscriptionButtonGroup.add(regAllRadioButtonMenuItem);
-    regAllRadioButtonMenuItem.setText("All");
-    regAllRadioButtonMenuItem.setName("regAllRadioButtonMenuItem"); // NOI18N
-    regAllRadioButtonMenuItem.addActionListener(new java.awt.event.ActionListener()
+    jMenuItem2.setText("Register");
+    jMenuItem2.setName("jMenuItem2"); // NOI18N
+    jMenuItem2.addActionListener(new java.awt.event.ActionListener()
     {
       public void actionPerformed(java.awt.event.ActionEvent evt)
       {
         regAllRadioButtonMenuItemActionPerformed(evt);
       }
     });
-    jMenu3.add(regAllRadioButtonMenuItem);
-
-    jMenu2.add(jMenu3);
+    jMenu2.add(jMenuItem2);
 
     deregMenuItem.setText("Deregister");
     deregMenuItem.setName("deregMenuItem"); // NOI18N
@@ -2251,7 +2163,7 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   }
 
     private void generationEnabledCBActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_generationEnabledCBActionPerformed
-        // TODO add your handling code here:
+      // TODO add your handling code here:
 
     }//GEN-LAST:event_generationEnabledCBActionPerformed
 
@@ -3178,32 +3090,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
     private void regAllRadioButtonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regAllRadioButtonMenuItemActionPerformed
       try
       {
-        parameterService.monitorValueRegister(subRequestAll, adapterParameter);
-        aggregationService.monitorValueRegister(subRequestAll, adapterAggregation);
-      }
-      catch (MALException | MALInteractionException ex)
-      {
-        JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
-        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-      }
-    }//GEN-LAST:event_regAllRadioButtonMenuItemActionPerformed
-
-    private void regHalfRadioButtonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regHalfRadioButtonMenuItemActionPerformed
-      try
-      {
-        parameterService.monitorValueRegister(subRequestHalf, adapterParameter);
-        aggregationService.monitorValueRegister(subRequestHalf, adapterAggregation);
-      }
-      catch (MALException | MALInteractionException ex)
-      {
-        JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
-        Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
-      }
-    }//GEN-LAST:event_regHalfRadioButtonMenuItemActionPerformed
-
-    private void regWildcardRadioButtonMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_regWildcardRadioButtonMenuItemActionPerformed
-      try
-      {
         parameterService.monitorValueRegister(subRequestWildcard, adapterParameter);
         aggregationService.monitorValueRegister(subRequestWildcard, adapterAggregation);
       }
@@ -3212,7 +3098,7 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
         JOptionPane.showMessageDialog(null, "Could not connect to the provider!", "Error!", JOptionPane.PLAIN_MESSAGE);
         Logger.getLogger(MityDemoConsumerGui.class.getName()).log(Level.SEVERE, null, ex);
       }
-    }//GEN-LAST:event_regWildcardRadioButtonMenuItemActionPerformed
+    }//GEN-LAST:event_regAllRadioButtonMenuItemActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel ObjIdslotsTab;
@@ -3271,9 +3157,9 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private javax.swing.JLabel jLabel9;
   private javax.swing.JMenu jMenu1;
   private javax.swing.JMenu jMenu2;
-  private javax.swing.JMenu jMenu3;
   private javax.swing.JMenuBar jMenuBar1;
   private javax.swing.JMenuItem jMenuItem1;
+  private javax.swing.JMenuItem jMenuItem2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel10;
   private javax.swing.JPanel jPanel11;
@@ -3321,9 +3207,6 @@ public class MityDemoConsumerGui extends javax.swing.JFrame
   private javax.swing.JMenuItem quitMenuItem;
   private javax.swing.JComboBox rawTypeCB;
   private javax.swing.JTextField rawUnitTF;
-  private javax.swing.JRadioButtonMenuItem regAllRadioButtonMenuItem;
-  private javax.swing.JRadioButtonMenuItem regHalfRadioButtonMenuItem;
-  private javax.swing.JRadioButtonMenuItem regWildcardRadioButtonMenuItem;
   private javax.swing.JButton removeDefinitionAllButton;
   private javax.swing.JButton removeDefinitionAllButtonAgg;
   private javax.swing.JButton removeDefinitionButton;
