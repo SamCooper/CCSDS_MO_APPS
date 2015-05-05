@@ -19,7 +19,7 @@
   <parent>
     <groupId>int.esa.ccsds.mo</groupId>
     <artifactId>POM</artifactId>
-    <version>1</version>
+    <version>2</version>
     <relativePath/>
   </parent>
     
@@ -70,70 +70,71 @@
     </developer>
   </developers>
 
-<!--
   <properties>
-    <ccsds.specification.download.ref-skip>false</ccsds.specification.download.ref-skip>
-    <esa.stubgen.xmlDirectory>${basedir}/src/main/resources</esa.stubgen.xmlDirectory>
     <assembly.mainClass>esa.mo.mal.demo.provider.MityDemoProviderGui</assembly.mainClass>
   </properties>
--->
+
   <dependencies>
-        <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>API_MAL</artifactId>
-            <version>1.0.1-FC</version>
-        </dependency>
-        <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>MAL_IMPL</artifactId>
-            <exclusions> 
-                <exclusion> 
-                    <groupId>int.esa.ccsds.mo</groupId> 
-                    <artifactId>API_MAL</artifactId> 
-                </exclusion> 
-            </exclusions> 
-        </dependency>
+    <dependency>
+      <groupId>int.esa.ccsds.mo</groupId>
+      <artifactId>API_MAL</artifactId>
+      <version>1.0.1-FC</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.ccsds.mo</groupId>
+      <artifactId>MAL_IMPL</artifactId>
+      <exclusions> 
+        <exclusion> 
+          <groupId>int.esa.ccsds.mo</groupId> 
+          <artifactId>API_MAL</artifactId> 
+        </exclusion> 
+      </exclusions> 
+    </dependency>
     <dependency>
       <groupId>int.esa.ccsds.mo</groupId>
       <artifactId>TRANSPORT_RMI</artifactId>
     </dependency>
-<!--    <dependency>
+    <dependency>
       <groupId>int.esa.ccsds.mo</groupId>
       <artifactId>ENCODING_STRING</artifactId>
+      <version>1.0.1-FC</version>
     </dependency>
--->
-        <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>ENCODING_STRING</artifactId>
-            <version>1.0.1-FC</version>
-        </dependency>
-
-        <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>ENCODING_BINARY</artifactId>
-            <version>1.0.1-FC</version>
-        </dependency>
-        <dependency>
-            <groupId>int.esa.ccsds.mo</groupId>
-            <artifactId>API_COM</artifactId>
-            <exclusions> 
-                <exclusion> 
-                    <groupId>int.esa.ccsds.mo</groupId> 
-                    <artifactId>API_MAL</artifactId> 
-                </exclusion> 
-            </exclusions> 
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>API_MC</artifactId>
-            <version>${project.version}</version>
-            <exclusions> 
-                <exclusion> 
-                    <groupId>int.esa.ccsds.mo</groupId> 
-                    <artifactId>API_MAL</artifactId> 
-                </exclusion> 
-            </exclusions> 
-        </dependency>
+    <dependency>
+      <groupId>int.esa.ccsds.mo</groupId>
+      <artifactId>ENCODING_BINARY</artifactId>
+      <version>1.0.1-FC</version>
+    </dependency>
+    <dependency>
+      <groupId>int.esa.ccsds.mo</groupId>
+      <artifactId>API_COM</artifactId>
+      <exclusions> 
+        <exclusion> 
+          <groupId>int.esa.ccsds.mo</groupId> 
+          <artifactId>API_MAL</artifactId> 
+        </exclusion> 
+      </exclusions> 
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>API_MC</artifactId>
+      <version>${project.version}</version>
+      <exclusions> 
+        <exclusion> 
+          <groupId>int.esa.ccsds.mo</groupId> 
+          <artifactId>API_MAL</artifactId> 
+        </exclusion> 
+      </exclusions> 
+    </dependency>
+    <dependency>
+      <groupId>int.esa.ccsds.mo</groupId>
+      <artifactId>SUPPORT_LIB_MAL</artifactId>
+      <exclusions> 
+        <exclusion> 
+          <groupId>int.esa.ccsds.mo</groupId> 
+          <artifactId>API_MAL</artifactId> 
+        </exclusion> 
+      </exclusions> 
+    </dependency>
     <dependency>
       <groupId>org.jdesktop</groupId>
       <artifactId>beansbinding</artifactId>
@@ -158,27 +159,11 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>int.esa.ccsds.mo</groupId>
-        <artifactId>StubGenerator</artifactId>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.8</source>
           <target>1.8</target>
         </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-resources-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

@@ -18,24 +18,20 @@
  * limitations under the License. 
  * ----------------------------------------------------------------------------
  */
-package instrumentssimulator;
-
+package esa.mo.mc.demo.mity.sim.instruments;
 
 /**
  *
  * @author Cesar Coelho
  */
-public class FineADCS {
-    
-    private Orbit orbit;
-    public Magnetometer magnetometer;
-            
-        public FineADCS(Orbit orbit) {
-               this.orbit = orbit;
-               magnetometer = new Magnetometer(orbit);
-        }
-        
+public class FineADCS
+{
+  private Orbit orbit;
+  public Magnetometer magnetometer;
+
+  public FineADCS(Orbit orbit)
+  {
+    this.orbit = orbit;
+    magnetometer = new Magnetometer(orbit);
+  }
 }
-
-
-
